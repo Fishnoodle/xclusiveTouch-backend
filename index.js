@@ -15,7 +15,12 @@ app.use(cors())
 app.use(express.json())
 
 // Mongoose connection
-mongoose.connect('mongodb+srv://root:WxIMksA4XiLxnEd6@xclusivetouch.gs88nsy.mongodb.net/?retryWrites=true&w=majority&appName=XclusiveTouch')
+try {
+    mongoose.connect('mongodb+srv://root:WxIMksA4XiLxnEd6@xclusivetouch.gs88nsy.mongodb.net/?retryWrites=true&w=majority&appName=XclusiveTouch')
+    console.log('MongoDB connected')
+} catch (err) {
+    console.log(err)
+}
 
 /*
 -------------
@@ -26,6 +31,7 @@ USER MODEL
 // Creates user, hashed password & checks for duplicate email
 app.post('/api/register', async (req, res) => {
     console.log('Registering user')
+    console.log(req.body.email, req.body.password)
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
 
@@ -34,7 +40,7 @@ app.post('/api/register', async (req, res) => {
             password: hashedPassword
         })
 
-
+        res.json({ status: 'ok', user: user })
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Duplicate email' })
