@@ -23,6 +23,11 @@ const profile = new mongoose.Schema(
                 twitch: { type: String },
                 other: { type: String },
             }],
+            colours: [{
+                primaryColour: { type: String, required: true },
+                profilePhoto: { type: String, required: true },
+                cardColour: { type: String, required: true },
+            }]
         }],
     },
     { collection: 'profile'}

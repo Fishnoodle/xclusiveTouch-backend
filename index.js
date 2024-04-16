@@ -135,6 +135,11 @@ app.post('/api/profile', async (req, res) => {
                     pinterest: req.body.profile.socialMedia.pinterest,
                     twitch: req.body.profile.socialMedia.twitch,
                     other: req.body.profile.socialMedia.other
+                },
+                colours: {
+                    primaryColour: req.body.profile.colours.primaryColour,
+                    profilePhoto: req.body.profile.colours.profilePhoto,
+                    cardColour: req.body.profile.colours.cardColour
                 }
             }
         })
@@ -180,6 +185,11 @@ app.put('/api/profile/:id', async (req, res) => {
                         pinterest: req.body.profile.socialMedia.pinterest,
                         twitch: req.body.profile.socialMedia.twitch,
                         other: req.body.profile.socialMedia.other
+                    },
+                    colours: {
+                        primaryColour: req.body.profile.colours.primaryColour,
+                        profilePhoto: req.body.profile.colours.profilePhoto,
+                        cardColour: req.body.profile.colours.cardColour
                     }
                 }
             }
