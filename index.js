@@ -77,7 +77,7 @@ app.post('/api/login', async (req, res) => {
 
         return res.json({ status: 'ok', user: user, data: token })
     } else {
-        return res.json({ status: 'error', user: false })
+        return res.json({ status: 'error', error: 'Incorrect Credentials' })
     }
 })
 
