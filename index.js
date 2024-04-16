@@ -6,8 +6,9 @@ const bcrypt = require('bcrypt')
 const fs = require('fs')
 const https = require('https')
 
-// User Model
+// Models
 const User = require('./models/user.model')
+const Profile = require('./models/profile.model')
 
 const app = express()
 
@@ -80,6 +81,115 @@ app.post('/api/login', async (req, res) => {
         return res.json({ status: 'error', error: 'Incorrect Credentials' })
     }
 })
+
+/*
+-------------
+PROFILE MODEL
+-------------
+*/
+
+app.get('/api/profile', async (req, res) => {
+    console.log('Getting profile')
+    console.log(req.body)
+    try {
+        const profile = await Profile.findOne({ email: req.body.email })
+
+        console.log(profile)
+
+        return res.json({ status: 'ok', data: profile })
+    } catch (err) {
+        console.log(err)
+        res.json({ status: 'error', error: 'Invalid Profile' })
+    }
+})
+
+app.post('/api/profile', async (req, res) => {
+    console.log('Creating or updating profile')
+    console.log(req.body)
+    try{
+        const user = await User.findOne({ email: req.body.email })
+
+        if (!user) {
+            return res.json({ status: 'error', error: 'User not found' })
+        }
+
+        const profile = await Profile.create({
+            email: req.body.email,
+            profile: {
+                firstName: req.body.profile.firstName,
+                lastName: req.body.profile.lastName,
+                phoneNumber: req.body.profile.phoneNumber,
+                email: req.body.profile.email,
+                position: req.body.profile.position,
+                company: req.body.profile.company,
+                about: req.body.profile.about,
+                socialMedia: {
+                    facebook: req.body.profile.socialMedia.facebook,
+                    twitter: req.body.profile.socialMedia.twitter,
+                    linkedIn: req.body.profile.socialMedia.linkedIn,
+                    instagram: req.body.profile.socialMedia.instagram,
+                    tikTok: req.body.profile.socialMedia.tikTok,
+                    snapchat: req.body.profile.socialMedia.snapchat,
+                    youtube: req.body.profile.socialMedia.youtube,
+                    pinterest: req.body.profile.socialMedia.pinterest,
+                    twitch: req.body.profile.socialMedia.twitch,
+                    other: req.body.profile.socialMedia.other
+                }
+            }
+        })
+
+        res.json({ status: 'ok', data: profile })
+
+    } catch (err) {
+        console.log(err)
+        res.json({ status: 'error', error: 'Invalid Profile' })
+    }
+})
+
+app.put('/api/profile', async (req, res) => {
+    console.log('Updating profile')
+    console.log(req.body)
+    try {
+        const user = await User.findOne({ email: req.body.email })
+
+        if (!user) {
+            return res.json({ status: 'error', error: 'User not found' })
+        }
+
+        const profile = await Profile.findOneAndUpdate(
+            { email: req.body.email },
+            {
+                profile: {
+                    firstName: req.body.profile.firstName,
+                    lastName: req.body.profile.lastName,
+                    phoneNumber: req.body.profile.phoneNumber,
+                    email: req.body.profile.email,
+                    position: req.body.profile.position,
+                    company: req.body.profile.company,
+                    about: req.body.profile.about,
+                    socialMedia: {
+                        facebook: req.body.profile.socialMedia.facebook,
+                        twitter: req.body.profile.socialMedia.twitter,
+                        linkedIn: req.body.profile.socialMedia.linkedIn,
+                        instagram: req.body.profile.socialMedia.instagram,
+                        tikTok: req.body.profile.socialMedia.tikTok,
+                        snapchat: req.body.profile.socialMedia.snapchat,
+                        youtube: req.body.profile.socialMedia.youtube,
+                        pinterest: req.body.profile.socialMedia.pinterest,
+                        twitch: req.body.profile.socialMedia.twitch,
+                        other: req.body.profile.socialMedia.other
+                    }
+                }
+            }
+        )
+
+        res.json({ status: 'ok', data: profile })
+    } catch (err) {
+        console.log(err)
+        res.json({ status: 'error', error: 'Invalid Profile' })
+    }
+})
+
 
 app.listen(8001, () => {
     console.log('Server started on port 8001')
