@@ -88,11 +88,12 @@ PROFILE MODEL
 -------------
 */
 
-app.get('/api/profile', async (req, res) => {
+app.get('/api/profile/:id', async (req, res) => {
+    const id = req.params.id
     console.log('Getting profile')
     console.log(req.body)
     try {
-        const profile = await Profile.findOne({ email: req.body.email })
+        const profile = await Profile.findOne({ id: req.body._id })
 
         console.log(profile)
 
@@ -146,11 +147,12 @@ app.post('/api/profile', async (req, res) => {
     }
 })
 
-app.put('/api/profile', async (req, res) => {
+app.put('/api/profile/:id', async (req, res) => {
+    const id = req.params.id
     console.log('Updating profile')
     console.log(req.body)
     try {
-        const user = await User.findOne({ email: req.body.email })
+        const user = await User.findOne({ id: req.body._id })
 
         if (!user) {
             return res.json({ status: 'error', error: 'User not found' })
