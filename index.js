@@ -91,17 +91,8 @@ PROFILE MODEL
 app.get('/api/profile/:id', async (req, res) => {
     const id = req.params.id
     console.log('Getting profile')
-    console.log(req.body)
     try {
-        const profile = await Profile.findOne({ id: req.body._id })
-
-        console.log(profile)
-
-        console.log(Object.keys(profile).length)
-
-        if (Object.keys(profile).length === 0) {
-            return res.json({ status: 'error', error: 'Profile not found' })
-        }
+        const profile = await Profile.findOne({ id: id })
 
         return res.json({ status: 'ok', data: profile })
     } catch (err) {
