@@ -105,38 +105,32 @@ app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
     try{
-        const user = await User.findOne({ email: req.body.email })
-
-        if (!user) {
-            return res.json({ status: 'error', error: 'User not found' })
-        }
-
         const profile = await Profile.create({
             email: req.body.email,
             profile: {
-                firstName: req.body.profile.firstName,
-                lastName: req.body.profile.lastName,
-                phoneNumber: req.body.profile.phoneNumber,
-                email: req.body.profile.email,
-                position: req.body.profile.position,
-                company: req.body.profile.company,
-                about: req.body.profile.about,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                phoneNumber: req.body.phoneNumber,
+                email: req.body.email,
+                position: req.body.position,
+                company: req.body.company,
+                about: req.body.about,
                 socialMedia: {
-                    facebook: req.body.profile.socialMedia.facebook,
-                    twitter: req.body.profile.socialMedia.twitter,
-                    linkedIn: req.body.profile.socialMedia.linkedIn,
-                    instagram: req.body.profile.socialMedia.instagram,
-                    tikTok: req.body.profile.socialMedia.tikTok,
-                    snapchat: req.body.profile.socialMedia.snapchat,
-                    youtube: req.body.profile.socialMedia.youtube,
-                    pinterest: req.body.profile.socialMedia.pinterest,
-                    twitch: req.body.profile.socialMedia.twitch,
-                    other: req.body.profile.socialMedia.other
+                    facebook: req.body.socialMedia.facebook,
+                    twitter: req.body.socialMedia.twitter,
+                    linkedIn: req.body.socialMedia.linkedIn,
+                    instagram: req.body.socialMedia.instagram,
+                    tikTok: req.body.socialMedia.tikTok,
+                    snapchat: req.body.socialMedia.snapchat,
+                    youtube: req.body.socialMedia.youtube,
+                    pinterest: req.body.socialMedia.pinterest,
+                    twitch: req.body.socialMedia.twitch,
+                    other: req.body.socialMedia.other
                 },
                 colours: {
-                    primaryColour: req.body.profile.colours.primaryColour,
-                    profilePhoto: req.body.profile.colours.profilePhoto,
-                    cardColour: req.body.profile.colours.cardColour
+                    primaryColour: req.body.primaryColour,
+                    profilePhoto: req.body.profilePhoto,
+                    cardColour: req.body.cardColour
                 }
             }
         })
