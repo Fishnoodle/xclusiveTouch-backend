@@ -97,6 +97,8 @@ app.get('/api/profile/:id', async (req, res) => {
 
         console.log(profile)
 
+        console.log(Object.keys(profile).length)
+
         if (Object.keys(profile).length === 0) {
             return res.json({ status: 'error', error: 'Profile not found' })
         }
