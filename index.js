@@ -104,6 +104,9 @@ app.get('/api/profile/:id', async (req, res) => {
 app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
+
+    let socialMedia = req.body.socialMedia || {}
+    
     try{
         const profile = await Profile.create({
             email: req.body.email,
@@ -116,16 +119,16 @@ app.post('/api/profile', async (req, res) => {
                 company: req.body.company,
                 about: req.body.about,
                 socialMedia: {
-                    facebook: req.body.socialMedia.facebook,
-                    twitter: req.body.socialMedia.twitter,
-                    linkedIn: req.body.socialMedia.linkedIn,
-                    instagram: req.body.socialMedia.instagram,
-                    tikTok: req.body.socialMedia.tikTok,
-                    snapchat: req.body.socialMedia.snapchat,
-                    youtube: req.body.socialMedia.youtube,
-                    pinterest: req.body.socialMedia.pinterest,
-                    twitch: req.body.socialMedia.twitch,
-                    other: req.body.socialMedia.other
+                    facebook: socialMedia.facebook,
+                    twitter: socialMedia.twitter,
+                    linkedIn: socialMedia.linkedIn,
+                    instagram: socialMedia.instagram,
+                    tikTok: socialMedia.tikTok,
+                    snapchat: socialMedia.snapchat,
+                    youtube: socialMedia.youtube,
+                    pinterest: socialMedia.pinterest,
+                    twitch: socialMedia.twitch,
+                    other: socialMedia.other
                 },
                 colours: {
                     primaryColour: req.body.primaryColour,
