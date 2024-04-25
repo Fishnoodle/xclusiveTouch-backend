@@ -12,7 +12,13 @@ const Profile = require('./models/profile.model')
 
 const app = express()
 
-app.use(cors())
+const corsOptions = {
+    origin: 'https://xclusivetouch.ca',
+    credentials: true,
+    optionSuccessStatus: 200
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // Mongoose connection
