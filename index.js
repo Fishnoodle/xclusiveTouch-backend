@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
@@ -200,6 +201,9 @@ app.put('/api/profile/:id', async (req, res) => {
     }
 })
 
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'static/index.html'))
+})
 
 app.listen(8001, () => {
     console.log('Server started on port 8001')
