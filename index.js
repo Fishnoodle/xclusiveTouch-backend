@@ -50,6 +50,7 @@ app.post('/api/register', async (req, res) => {
 
 // Login user, hashed password, and create jwt token
 app.post('/api/login', async (req, res) => {
+    try {
     console.log('Loggin in user')
 
     console.log(req.body.email, req.body.password)
@@ -84,6 +85,10 @@ app.post('/api/login', async (req, res) => {
     } else {
         return res.json({ status: 'error', error: 'Incorrect Credentials' })
     }
+} catch (err) {
+    console.log(err)
+    res.json({ status: 'error', error: 'Invalid email/password' })
+}
 })
 
 /*
