@@ -58,6 +58,8 @@ app.post('/api/login', async (req, res) => {
         email: req.body.email,
     })
 
+    console.log('User Status', user)
+
     console.log('User Status', user, user.email)
 
     if (!user) {
