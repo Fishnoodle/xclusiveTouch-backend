@@ -1,4 +1,3 @@
-const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
@@ -199,10 +198,6 @@ app.put('/api/profile/:id', async (req, res) => {
         console.log(err)
         res.json({ status: 'error', error: 'Invalid Profile' })
     }
-})
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'static/index.html'))
 })
 
 app.listen(8001, () => {
