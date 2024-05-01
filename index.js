@@ -81,6 +81,8 @@ app.post('/api/login', async (req, res) => {
             'secret123'
         )
 
+        res.cookie('token', jwtToken, { httpOnly: true });
+
         return res.json({ status: 'ok', user: user, data: token })
     } else {
         return res.json({ status: 'error', error: 'Incorrect Credentials' })
