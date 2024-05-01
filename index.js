@@ -81,7 +81,7 @@ app.post('/api/login', async (req, res) => {
             'secret123'
         )
 
-        res.cookie('token', jwtToken, { httpOnly: true });
+        res.cookie('token', token, { httpOnly: true });
 
         return res.json({ status: 'ok', user: user, data: token })
     } else {
