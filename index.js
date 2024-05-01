@@ -52,7 +52,7 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     console.log('Loggin in user')
 
-    console.log(req.body)
+    console.log(req.body.email, req.body.password)
 
     const user = await User.findOne({
         email: req.body.email,
