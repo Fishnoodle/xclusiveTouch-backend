@@ -17,7 +17,7 @@ app.use(express.json())
 
 // Mongoose connection
 try {
-    mongoose.connect('mongodb+srv://root:WxIMksA4XiLxnEd6@xclusivetouch.gs88nsy.mongodb.net/?retryWrites=true&w=majority&appName=XclusiveTouch')
+    mongoose.connect('mongodb+srv://Dev123:Mikey2024@xclusivetouch.gs88nsy.mongodb.net/?retryWrites=true&w=majority&appName=XclusiveTouch')
     console.log('MongoDB connected')
 } catch (err) {
     console.log(err)
