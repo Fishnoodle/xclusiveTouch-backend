@@ -112,9 +112,9 @@ app.post('/api/login', async (req, res) => {
         email: req.body.email,
     })
 
-    console.log('User Status', user)
-
-    console.log('User Status', user, user.email)
+    if (User.isValid === false) {
+        return res.json({ status: 'error', error: 'Please confirm your email' })
+    }
 
     if (!user) {
         return res.json({ status: 'error', error: 'Invalid email/password' })
