@@ -6,6 +6,13 @@ const bcrypt = require('bcrypt')
 const fs = require('fs')
 const https = require('https')
 
+// env imports
+require('dotenv').config()
+
+// Emails imports 
+const crypto = require('crypto')
+const nodemailer = require('nodemailer')
+
 // Models
 const User = require('./models/user.model')
 const Profile = require('./models/profile.model')
@@ -32,19 +39,65 @@ USER MODEL
 // Creates user, hashed password & checks for duplicate email
 app.post('/api/register', async (req, res) => {
     console.log('Registering user')
-    console.log(req.body.email, req.body.password)
+
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        const confirmationToken = crypto.randomBytes(20).toString('hex')
 
         const user = await User.create({
             email: req.body.email,
-            password: hashedPassword
+            password: hashedPassword,
+            isValid: false,
+            confirmationToken: confirmationToken
+        })
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        })
+
+        const mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            to: req.body.email,
+            subject: 'Confirm Email',
+            text: `Please click this link to confirm your email: https://api.xclusivetouch.ca/api/confirm/${confirmationToken}`
+        }
+
+        transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log('Email sent: ' + info.response)
+            }
         })
 
         res.json({ status: 'ok', user: user })
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Duplicate email' })
+    }
+})
+
+// Confirmation email - token
+app.get('/api/confirm/:token', async (req, res) => {
+    try {
+        const user = await User.findOne({ confirmationToken: req.params.token })
+
+        if (!user) {
+            return res.json({ status: 'error', error: 'Invalid confirmation token' })
+        }
+
+        user.isValid = true
+        user.confirmationToken = null
+        await user.save()
+
+        res.json({ status: 'ok' })
+    } catch (err) {
+        console.log(err)
+        res.json({ status: 'error', error: 'Error confirming registration' });
     }
 })
 
