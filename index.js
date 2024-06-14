@@ -47,6 +47,7 @@ app.post('/api/register', async (req, res) => {
         const user = await User.create({
             email: req.body.email,
             password: hashedPassword,
+            username: req.body.username,
             isValid: false,
             confirmationToken: confirmationToken
         })
@@ -169,6 +170,19 @@ app.get('/api/profile/:id', async (req, res) => {
     }
 })
 
+app.get('/api/publicProfile/:username', async (req, res) => {
+    const username = req.params.username
+    console.log('Getting public profile')
+    try {
+        const profile = await Profile.findOne({ username: username})
+
+        return res.json({ status: 'ok', data: profile })
+    } catch (err) {
+        console.log(err)
+        res.json({ status: 'error', error: 'Invalid Profile' })
+    }
+})
+
 app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
@@ -176,8 +190,11 @@ app.post('/api/profile', async (req, res) => {
     let socialMedia = req.body.socialMedia || {}
     
     try{
+        const user = await User.findOne({ email: req.body.email })
+
         const profile = await Profile.create({
             email: req.body.email,
+            username: user.username,
             profile: {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
