@@ -246,29 +246,29 @@ app.put('/api/profile/:id', async (req, res) => {
             { email: req.body.email },
             {
                 profile: {
-                    firstName: req.body.profile.firstName,
-                    lastName: req.body.profile.lastName,
-                    phoneNumber: req.body.profile.phoneNumber,
-                    email: req.body.profile.email,
-                    position: req.body.profile.position,
-                    company: req.body.profile.company,
-                    about: req.body.profile.about,
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    phoneNumber: req.body.phoneNumber,
+                    email: req.body.email,
+                    position: req.body.position,
+                    company: req.body.company,
+                    about: req.body.about,
                     socialMedia: {
-                        facebook: req.body.profile.socialMedia.facebook,
-                        twitter: req.body.profile.socialMedia.twitter,
-                        linkedIn: req.body.profile.socialMedia.linkedIn,
-                        instagram: req.body.profile.socialMedia.instagram,
-                        tikTok: req.body.profile.socialMedia.tikTok,
-                        snapchat: req.body.profile.socialMedia.snapchat,
-                        youtube: req.body.profile.socialMedia.youtube,
-                        pinterest: req.body.profile.socialMedia.pinterest,
-                        twitch: req.body.profile.socialMedia.twitch,
-                        other: req.body.profile.socialMedia.other
+                        facebook: socialMedia.facebook,
+                        twitter: socialMedia.twitter,
+                        linkedIn: socialMedia.linkedIn,
+                        instagram: socialMedia.instagram,
+                        tikTok: socialMedia.tikTok,
+                        snapchat: socialMedia.snapchat,
+                        youtube: socialMedia.youtube,
+                        pinterest: socialMedia.pinterest,
+                        twitch: socialMedia.twitch,
+                        other: socialMedia.other
                     },
                     colours: {
-                        primaryColour: req.body.profile.colours.primaryColour,
-                        profilePhoto: req.body.profile.colours.profilePhoto,
-                        cardColour: req.body.profile.colours.cardColour
+                        primaryColour: req.body.primaryColour,
+                        profilePhoto: req.body.profilePhoto,
+                        cardColour: req.body.cardColour
                     }
                 }
             }
