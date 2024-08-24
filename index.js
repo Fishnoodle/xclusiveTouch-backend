@@ -203,7 +203,7 @@ app.post('/api/profile', async (req, res) => {
                 position: req.body.position,
                 company: req.body.company,
                 about: req.body.about,
-                socialMedia: socialMedia ?{
+                socialMedia: socialMedia ? {
                     facebook: socialMedia?.facebook,
                     twitter: socialMedia?.twitter,
                     linkedIn: socialMedia?.linkedIn,
