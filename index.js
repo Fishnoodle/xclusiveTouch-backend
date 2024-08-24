@@ -204,16 +204,16 @@ app.post('/api/profile', async (req, res) => {
                 company: req.body.company,
                 about: req.body.about,
                 socialMedia: {
-                    facebook: socialMedia.facebook,
-                    twitter: socialMedia.twitter,
-                    linkedIn: socialMedia.linkedIn,
-                    instagram: socialMedia.instagram,
-                    tikTok: socialMedia.tikTok,
-                    snapchat: socialMedia.snapchat,
-                    youtube: socialMedia.youtube,
-                    pinterest: socialMedia.pinterest,
-                    twitch: socialMedia.twitch,
-                    other: socialMedia.other
+                    facebook: socialMedia?.facebook,
+                    twitter: socialMedia?.twitter,
+                    linkedIn: socialMedia?.linkedIn,
+                    instagram: socialMedia?.instagram,
+                    tikTok: socialMedia?.tikTok,
+                    snapchat: socialMedia?.snapchat,
+                    youtube: socialMedia?.youtube,
+                    pinterest: socialMedia?.pinterest,
+                    twitch: socialMedia?.twitch,
+                    other: socialMedia?.other
                 },
                 colours: {
                     primaryColour: req.body.primaryColour,
@@ -254,16 +254,16 @@ app.put('/api/profile/:id', async (req, res) => {
                     company: req.body.company,
                     about: req.body.about,
                     socialMedia: {
-                        facebook: socialMedia.facebook,
-                        twitter: socialMedia.twitter,
-                        linkedIn: socialMedia.linkedIn,
-                        instagram: socialMedia.instagram,
-                        tikTok: socialMedia.tikTok,
-                        snapchat: socialMedia.snapchat,
-                        youtube: socialMedia.youtube,
-                        pinterest: socialMedia.pinterest,
-                        twitch: socialMedia.twitch,
-                        other: socialMedia.other
+                        facebook: socialMedia?.facebook,
+                        twitter: socialMedia?.twitter,
+                        linkedIn: socialMedia?.linkedIn,
+                        instagram: socialMedia?.instagram,
+                        tikTok: socialMedia?.tikTok,
+                        snapchat: socialMedia?.snapchat,
+                        youtube: socialMedia?.youtube,
+                        pinterest: socialMedia?.pinterest,
+                        twitch: socialMedia?.twitch,
+                        other: socialMedia?.other
                     },
                     colours: {
                         primaryColour: req.body.primaryColour,
