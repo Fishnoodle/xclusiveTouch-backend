@@ -187,7 +187,12 @@ app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
 
-    let socialMedia = req.body.socialMedia || {}
+    const socialMediaLinks = {};
+    (req.body.socialMedia || []).forEach(({ platform, link }) => {
+        if (platform) {
+            socialMediaLinks[platform.toLowerCase()] = link;
+        }
+    })
     
     try{
         const user = await User.findOne({ email: req.body.email })
@@ -203,18 +208,7 @@ app.post('/api/profile', async (req, res) => {
                 position: req.body.position,
                 company: req.body.company,
                 about: req.body.about,
-                socialMedia: socialMedia ? {
-                    facebook: socialMedia?.facebook,
-                    twitter: socialMedia?.twitter,
-                    linkedIn: socialMedia?.linkedIn,
-                    instagram: socialMedia?.instagram,
-                    tikTok: socialMedia?.tikTok,
-                    snapchat: socialMedia?.snapchat,
-                    youtube: socialMedia?.youtube,
-                    pinterest: socialMedia?.pinterest,
-                    twitch: socialMedia?.twitch,
-                    other: socialMedia?.other
-                } : null,
+                socialMedia: socialMediaLinks,
                 colours: {
                     primaryColour: req.body.primaryColour,
                     profilePhoto: req.body.profilePhoto,
@@ -242,6 +236,13 @@ app.put('/api/profile/:id', async (req, res) => {
             return res.json({ status: 'error', error: 'User not found' })
         }
 
+        const socialMediaLinks = {};
+        (req.body.socialMedia || []).forEach(({ platform, link }) => {
+            if (platform) {
+                socialMediaLinks[platform.toLowerCase()] = link;
+            }
+        })
+
         const profile = await Profile.findOneAndUpdate(
             { email: req.body.email },
             {
@@ -253,18 +254,7 @@ app.put('/api/profile/:id', async (req, res) => {
                     position: req.body.position,
                     company: req.body.company,
                     about: req.body.about,
-                    socialMedia: socialMedia ? {
-                        facebook: socialMedia?.facebook,
-                        twitter: socialMedia?.twitter,
-                        linkedIn: socialMedia?.linkedIn,
-                        instagram: socialMedia?.instagram,
-                        tikTok: socialMedia?.tikTok,
-                        snapchat: socialMedia?.snapchat,
-                        youtube: socialMedia?.youtube,
-                        pinterest: socialMedia?.pinterest,
-                        twitch: socialMedia?.twitch,
-                        other: socialMedia?.other
-                    } : null,
+                    socialMedia: socialMediaLinks,
                     colours: {
                         primaryColour: req.body.primaryColour,
                         profilePhoto: req.body.profilePhoto,
