@@ -5,8 +5,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const fs = require('fs')
 const https = require('https')
-import multer from 'multer'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+const multer = require('multer');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 // env imports
 require('dotenv').config()
