@@ -5,9 +5,24 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const fs = require('fs')
 const https = require('https')
+import multer from 'multer'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 // env imports
 require('dotenv').config()
+
+const bucketName = process.env.BUCKET_NAME
+const bucketRegion = process.env.BUCKET_REGION
+const accessKey = process.env.ACCESS_KEY
+const secretAccessKey = process.env.SECRET_ACCESS_KEY
+
+const s3 = new S3Client({
+    credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretAccessKey
+    },
+    region: bucketRegion
+})
 
 // Emails imports 
 const crypto = require('crypto')
@@ -17,10 +32,16 @@ const nodemailer = require('nodemailer')
 const User = require('./models/user.model')
 const Profile = require('./models/profile.model')
 
+
 const app = express()
 
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json())
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
+
+upload.single('profilePhoto')
 
 // Mongoose connection
 try {
@@ -211,11 +232,23 @@ app.post('/api/profile', async (req, res) => {
                 socialMedia: socialMediaLinks,
                 colours: {
                     primaryColour: req.body.primaryColour,
-                    profilePhoto: req.body.profilePhoto,
+                    // profilePhoto: req.body.profilePhoto,
                     cardColour: req.body.cardColour
                 }
             }
         })
+
+        req.file.buffer
+
+        const params = {
+            Bucket: bucketName,
+            Key: req.file.originalname,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+        }
+
+        const command = new PutObjectCommand(params)
+        await s3.send(command)
 
         res.json({ status: 'ok', data: profile })
 
@@ -257,12 +290,24 @@ app.put('/api/profile/:id', async (req, res) => {
                     socialMedia: socialMediaLinks,
                     colours: {
                         primaryColour: req.body.primaryColour,
-                        profilePhoto: req.body.profilePhoto,
+                        // profilePhoto: req.body.profilePhoto,
                         cardColour: req.body.cardColour
                     }
                 }
             }
         )
+
+        req.file.buffer
+
+        const params = {
+            Bucket: bucketName,
+            Key: req.file.originalname,
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
+        }
+
+        const command = new PutObjectCommand(params)
+        await s3.send(command)
 
         res.json({ status: 'ok', data: profile })
     } catch (err) {
