@@ -287,7 +287,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             });
         } else {
             console.error('req.body.socialMedia is not defined:', req.body);
-        }}
+        }
 
         const profile = await Profile.findOneAndUpdate(
             { email: req.body.email },
