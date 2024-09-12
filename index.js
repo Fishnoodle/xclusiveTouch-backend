@@ -329,7 +329,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         }
 
         // Send the upload to S3
-        await S3Client.send(new PutObjectCommand(params))
+        await s3.send(new PutObjectCommand(params))
 
         res.json({ status: 'ok', data: profile })
     } catch (err) {
