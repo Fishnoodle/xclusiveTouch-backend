@@ -314,7 +314,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             throw new Error('No file uploaded');
         }
 
-        const file = file = req.file
+        const file = req.file
 
         const fileBuffer = await sharp(file.buffer)
             .resize({ width: 500, height: 500, fit: "contain" })
