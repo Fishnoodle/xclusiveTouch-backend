@@ -266,7 +266,7 @@ app.post('/api/profile', async (req, res) => {
 
 app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const id = req.params.id
-    const generateFileName = (btyes = 32) => crypto.randomBytes(bytes).toString('hex')
+    const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
     console.log('Updating profile')
     console.log(req.body)
