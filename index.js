@@ -258,7 +258,7 @@ app.post('/api/profile', async (req, res) => {
     }
 })
 
-app.put('/api/profile/:id', async (req, res) => {
+app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const id = req.params.id
     console.log('Updating profile')
     console.log(req.body)
@@ -297,7 +297,9 @@ app.put('/api/profile/:id', async (req, res) => {
             }
         )
 
-        req.file.buffer
+        if (!req.file) {
+            throw new Error('No file uploaded');
+        }
 
         const params = {
             Bucket: bucketName,
