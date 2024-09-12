@@ -208,12 +208,18 @@ app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
 
-    const socialMediaLinks = {};
-    (req.body.socialMedia || []).forEach(({ platform, link }) => {
-        if (platform) {
-            socialMediaLinks[platform.toLowerCase()] = link;
-        }
-    })
+    console.log('socialMedia:', req.body.socialMedia);
+
+    try {
+        const socialMediaLinks = {};
+        (JSON.parse(req.body.socialMedia || '[]')).forEach(({ platform, link }) => {
+            if (platform) {
+                socialMediaLinks[platform.toLowerCase()] = link;
+            }
+        })
+    } catch (err) {
+        console.error('Error parsing socialMedia:', err);
+    }
     
     try{
         const user = await User.findOne({ email: req.body.email })
