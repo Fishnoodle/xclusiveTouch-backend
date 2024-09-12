@@ -7,7 +7,8 @@ const fs = require('fs')
 const https = require('https')
 const multer = require('multer');
 const sharp = require('sharp');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 // env imports
 require('dotenv').config()
@@ -42,6 +43,7 @@ app.use(express.json())
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
+const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
 // Mongoose connection
 try {
@@ -266,7 +268,7 @@ app.post('/api/profile', async (req, res) => {
 
 app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const id = req.params.id
-    const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
+    const fileName = generateFileName()
 
     console.log('Updating profile')
     console.log(req.body)
@@ -303,7 +305,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
                     socialMedia: socialMediaLinks,
                     colours: {
                         primaryColour: req.body.primaryColour,
-                        // profilePhoto: req.body.profilePhoto,
+                        profilePhoto: fileName,
                         cardColour: req.body.cardColour
                     }
                 }
@@ -320,7 +322,6 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             .resize({ width: 500, height: 500, fit: "contain" })
             .toBuffer()
 
-        const fileName = generateFileName()
         const params = {
             Bucket: bucketName,
             Body: fileBuffer,
