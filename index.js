@@ -278,11 +278,15 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         }
 
         const socialMediaLinks = {};
-        (req.body.socialMedia || []).forEach(({ platform, link }) => {
-            if (platform) {
-                socialMediaLinks[platform.toLowerCase()] = link;
-            }
-        })
+        if (Array.isArray(req.body.socialMedia)) {
+            req.body.socialMedia.forEach(({ platform, link }) => {
+                if (platform) {
+                    socialMediaLinks[platform.toLowerCase()] = link;
+                }
+            });
+        } else {
+            console.error('req.body.socialMedia is not an array:', req.body.socialMedia);
+        }
 
         const profile = await Profile.findOneAndUpdate(
             { email: req.body.email },
@@ -312,7 +316,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         const file = file = req.file
 
         const fileBuffer = await sharp(file.buffer)
-            .resize({ width: 1920, height: 1080, fit: "contain" })
+            .resize({ width: 500, height: 500, fit: "contain" })
             .toBuffer()
 
         const fileName = generateFileName()
