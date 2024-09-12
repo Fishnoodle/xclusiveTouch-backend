@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const fs = require('fs')
 const https = require('https')
 const multer = require('multer');
+const sharp = require('sharp');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 // env imports
@@ -41,7 +42,6 @@ app.use(express.json())
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 
-upload.single('profilePhoto')
 
 // Mongoose connection
 try {
@@ -266,6 +266,8 @@ app.post('/api/profile', async (req, res) => {
 
 app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const id = req.params.id
+    const generateFileName = (btyes = 32) => crypto.randomBytes(bytes).toString('hex')
+
     console.log('Updating profile')
     console.log(req.body)
     try {
@@ -307,15 +309,22 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             throw new Error('No file uploaded');
         }
 
+        const file = file = req.file
+
+        const fileBuffer = await sharp(file.buffer)
+            .resize({ width: 1920, height: 1080, fit: "contain" })
+            .toBuffer()
+
+        const fileName = generateFileName()
         const params = {
             Bucket: bucketName,
-            Key: req.file.originalname,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
+            Body: fileBuffer,
+            Key: fileName,
+            ContentType: file.mimetype,
         }
 
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
+        // Send the upload to S3
+        await S3Client.send(new PutObjectCommand(params))
 
         res.json({ status: 'ok', data: profile })
     } catch (err) {
