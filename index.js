@@ -278,15 +278,16 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         }
 
         const socialMediaLinks = {};
-        if (Array.isArray(req.body.socialMedia)) {
-            req.body.socialMedia.forEach(({ platform, link }) => {
+        if (req.body.socialMedia) {
+            const socialMedia = JSON.parse(req.body.socialMedia);
+            socialMedia.forEach(({ platform, link }) => {
                 if (platform) {
                     socialMediaLinks[platform.toLowerCase()] = link;
                 }
             });
         } else {
-            console.error('req.body.socialMedia is not an array:', req.body.socialMedia);
-        }
+            console.error('req.body.socialMedia is not defined:', req.body);
+        }}
 
         const profile = await Profile.findOneAndUpdate(
             { email: req.body.email },
