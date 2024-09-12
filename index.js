@@ -181,12 +181,18 @@ app.get('/api/profile/:id', async (req, res) => {
     console.log('Getting profile')
     try {
         const user = await User.findOne({ _id: id })
-
-        console.log('User', user)
-
         const profile = await Profile.findOne({ email: user.email })
 
-        return res.json({ status: 'ok', data: profile })
+        const params = {
+            Bucket: bucketName,
+            Key: profile.profile[0].colours[0].profilePhoto
+        }
+
+        const command = new GetObjectCommand(params)
+        const seconds = 60
+        const url = await getSignedUrl(s3, command, { expiresIn: seconds })
+
+        return res.json({ status: 'ok', data: profile, url: url })
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Invalid Profile' })
@@ -197,9 +203,18 @@ app.get('/api/publicProfile/:username', async (req, res) => {
     const username = req.params.username
     console.log('Getting public profile')
     try {
-        const profile = await Profile.findOne({ username: username})
+        const profile = await Profile.findOne({ username: username })
 
-        return res.json({ status: 'ok', data: profile })
+        const params = {
+            Bucket: bucketName,
+            Key: profile.profile[0].colours[0].profilePhoto
+        }
+
+        const command = new GetObjectCommand(params)
+        const seconds = 60
+        const url = await getSignedUrl(s3, command, { expiresIn: seconds })
+
+        return res.json({ status: 'ok', data: profile, url: url })
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Invalid Profile' })
