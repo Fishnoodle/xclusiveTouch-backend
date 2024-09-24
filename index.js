@@ -327,25 +327,23 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             }
         )
 
-        if (!req.file) {
-            throw new Error('No file uploaded');
+        if (req.file) {
+            const file = req.file
+
+            const fileBuffer = await sharp(file.buffer)
+                .resize({ width: 500, height: 500, fit: "contain" })
+                .toBuffer()
+    
+            const params = {
+                Bucket: bucketName,
+                Body: fileBuffer,
+                Key: fileName,
+                ContentType: file.mimetype,
+            }
+    
+            // Send the upload to S3
+            await s3.send(new PutObjectCommand(params))
         }
-
-        const file = req.file
-
-        const fileBuffer = await sharp(file.buffer)
-            .resize({ width: 500, height: 500, fit: "contain" })
-            .toBuffer()
-
-        const params = {
-            Bucket: bucketName,
-            Body: fileBuffer,
-            Key: fileName,
-            ContentType: file.mimetype,
-        }
-
-        // Send the upload to S3
-        await s3.send(new PutObjectCommand(params))
 
         res.json({ status: 'ok', data: profile })
     } catch (err) {
