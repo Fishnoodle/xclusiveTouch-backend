@@ -297,7 +297,9 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         const socialMediaLinks = {};
         if (req.body.socialMedia) {
             const socialMedia = JSON.parse(req.body.socialMedia);
-            socialMedia.forEach(({ platform, link }) => {
+            socialMedia.forEach((item) => {
+                const platform = Object.keys(item)[0];
+                const link = item[platform];
                 if (platform) {
                     socialMediaLinks[platform.toLowerCase()] = link;
                 }
