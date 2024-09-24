@@ -286,7 +286,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const fileName = generateFileName()
 
     console.log('Updating profile')
-    console.log(req.body)
+    console.log(req.body.socialMedia)
     try {
         const user = await User.findOne({ id: req.body._id })
 
