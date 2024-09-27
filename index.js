@@ -243,7 +243,7 @@ app.post('/api/profile', async (req, res) => {
     } catch (err) {
         console.error('Error parsing socialMedia:', err);
     }
-    
+
     try{
         const user = await User.findOne({ email: req.body.email })
 
