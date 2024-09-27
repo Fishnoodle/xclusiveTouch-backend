@@ -235,9 +235,9 @@ app.get('/api/publicProfile/:username', async (req, res) => {
     }
 })
 
-app.post('/api/profile', async (req, res) => {
+app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
     console.log('Creating or updating profile')
-    console.log(req)
+    console.log(req.body)
     const fileName = generateFileName()
 
     console.log('socialMedia:', req.body.socialMedia);
