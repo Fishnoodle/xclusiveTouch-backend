@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs');
 const fs = require('fs')
 const https = require('https')
 const multer = require('multer');
@@ -237,7 +237,7 @@ app.get('/api/publicProfile/:username', async (req, res) => {
 
 app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
-    console.log(req.body)
+    console.log(req)
     const fileName = generateFileName()
 
     console.log('socialMedia:', req.body.socialMedia);
@@ -256,7 +256,7 @@ app.post('/api/profile', async (req, res) => {
             console.error('req.body.socialMedia is not defined:', req.body);
         }
 
-    try{
+    try {
         const user = await User.findOne({ email: req.body.email })
 
         if (!user) {
