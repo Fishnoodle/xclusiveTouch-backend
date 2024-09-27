@@ -263,6 +263,8 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
             return res.status(404).json({status: 'error', error: 'User not found'})
         }
 
+        console.log('User:', user)
+
         const profile = await Profile.create({
             email: req.body.email,
             username: user.username,
@@ -283,7 +285,11 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
             }
         })
 
+        console.log('profile made')
+
         if (req.file) {
+            console.log('uploading file')
+
             const file = req.file;
 
             const fileBuffer = await sharp(file.buffer)
@@ -296,8 +302,12 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
                 Key: fileName,
                 ContentType: file.mimetype,
             }
+
+            // Send the upload to S3
+            await s3.send(new PutObjectCommand(params))
         }
 
+        res.json({ status: 'ok', data: profile })
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Invalid Profile' })
