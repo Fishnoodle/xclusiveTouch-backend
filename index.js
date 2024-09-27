@@ -65,6 +65,8 @@ app.post('/api/register', async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        console.log('Hashed Password:', hashedPassword) // Debug
+
         const confirmationToken = crypto.randomBytes(20).toString('hex')
 
         const user = await User.create({
@@ -136,6 +138,8 @@ app.post('/api/login', async (req, res) => {
         email: req.body.email,
     })
 
+    console.log(user, 'USER')
+
     if (User.isValid === false) {
         return res.json({ status: 'error', error: 'Please confirm your email' })
     }
@@ -144,10 +148,14 @@ app.post('/api/login', async (req, res) => {
         return res.json({ status: 'error', error: 'Invalid email/password' })
     }
 
-    const isPasswordValid = await bcrypt.compare(
-        req.body.password,
-        user.password
-    )
+    console.log('Stored Hashed Password:', user.password); // Debug log
+    console.log('Entered Password:', req.body.password); // Debug log
+
+    const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
+    console.log('Is Password Valid:', isPasswordValid); // Debug log
+
+
+    console.log(isPasswordValid, 'IS PASSWORD VALID')
 
     if (isPasswordValid) {
         const token = jwt.sign(
@@ -162,7 +170,7 @@ app.post('/api/login', async (req, res) => {
 
         return res.json({ status: 'ok', user: user, data: token })
     } else {
-        return res.json({ status: 'error', error: 'Incorrect Credentials' })
+        return res.json({ status: 'error', error: 'Incorrect Credentials'})
     }
 } catch (err) {
     console.log(err)
@@ -230,22 +238,30 @@ app.get('/api/publicProfile/:username', async (req, res) => {
 app.post('/api/profile', async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
+    const fileName = generateFileName()
 
     console.log('socialMedia:', req.body.socialMedia);
 
-    try {
-        const socialMediaLinks = {};
-        (JSON.parse(req.body.socialMedia || '[]')).forEach(({ platform, link }) => {
-            if (platform) {
-                socialMediaLinks[platform.toLowerCase()] = link;
-            }
-        })
-    } catch (err) {
-        console.error('Error parsing socialMedia:', err);
-    }
+    const socialMediaLinks = [];
+        if (req.body.socialMedia) {
+            const socialMedia = JSON.parse(req.body.socialMedia);
+            socialMedia.forEach((item) => {
+                const platform = item.platform;
+                const link = item.link;
+                if (platform) {
+                    socialMediaLinks.push({ [platform.toLowerCase()]: link });
+                }
+            });
+        } else {
+            console.error('req.body.socialMedia is not defined:', req.body);
+        }
 
     try{
         const user = await User.findOne({ email: req.body.email })
+
+        if (!user) {
+            return res.status(404).json({status: 'error', error: 'User not found'})
+        }
 
         const profile = await Profile.create({
             email: req.body.email,
@@ -261,25 +277,26 @@ app.post('/api/profile', async (req, res) => {
                 socialMedia: socialMediaLinks,
                 colours: {
                     primaryColour: req.body.primaryColour,
-                    // profilePhoto: req.body.profilePhoto,
+                    profilePhoto: fileName,
                     cardColour: req.body.cardColour
                 }
             }
         })
 
-        req.file.buffer
+        if (req.file) {
+            const file = req.file;
 
-        const params = {
-            Bucket: bucketName,
-            Key: req.file.originalname,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
+            const fileBuffer = await sharp(file.buffer)
+                .resize({ width: 750, height: 750, fit: "contain" })
+                .toBuffer();
+
+            const params = {
+                Bucket: bucketName,
+                Body: fileBuffer,
+                Key: fileName,
+                ContentType: file.mimetype,
+            }
         }
-
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
-
-        res.json({ status: 'ok', data: profile })
 
     } catch (err) {
         console.log(err)
@@ -339,7 +356,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             const file = req.file
 
             const fileBuffer = await sharp(file.buffer)
-                .resize({ width: 500, height: 500, fit: "contain" })
+                .resize({ width: 750, height: 750, fit: "contain" })
                 .toBuffer()
     
             const params = {
