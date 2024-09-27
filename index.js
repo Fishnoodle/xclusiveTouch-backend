@@ -285,17 +285,15 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
             }
         })
 
-        console.log('profile made')
+        console.log('profile created', profile)
 
         if (req.file) {
-            console.log('uploading file')
-
-            const file = req.file;
+            const file = req.file
 
             const fileBuffer = await sharp(file.buffer)
                 .resize({ width: 750, height: 750, fit: "contain" })
-                .toBuffer();
-
+                .toBuffer()
+    
             const params = {
                 Bucket: bucketName,
                 Body: fileBuffer,
@@ -303,6 +301,8 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
                 ContentType: file.mimetype,
             }
 
+            console.log('S3 upload params:', params)
+    
             // Send the upload to S3
             await s3.send(new PutObjectCommand(params))
         }
@@ -362,6 +362,8 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             }
         )
 
+        console.log('profile created', profile)
+
         if (req.file) {
             const file = req.file
 
@@ -375,6 +377,8 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
                 Key: fileName,
                 ContentType: file.mimetype,
             }
+
+            console.log('S3 upload params:', params)
     
             // Send the upload to S3
             await s3.send(new PutObjectCommand(params))
