@@ -229,6 +229,12 @@ app.get('/api/publicProfile/:username', async (req, res) => {
         const seconds = 60
         const url = await getSignedUrl(s3, command, { expiresIn: seconds })
 
+        // Set a timeout to generate a new pre-signed URL when the previous one expires
+        setTimeout(async () => {
+            const newUrl = await getSignedUrl(s3, command, { expiresIn: seconds })
+            console.log('New pre-signed URL:', newUrl)
+        }, seconds * 1000)
+
         return res.json({ status: 'ok', data: profile, url: url })
     } catch (err) {
         console.log(err)
