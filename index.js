@@ -9,6 +9,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const path = require('path');
 
 // env imports
 require('dotenv').config()
@@ -110,22 +111,22 @@ app.post('/api/register', async (req, res) => {
 // Confirmation email - token
 app.get('/api/confirm/:token', async (req, res) => {
     try {
-        const user = await User.findOne({ confirmationToken: req.params.token })
+        const user = await User.findOne({ confirmationToken: req.params.token });
 
         if (!user) {
-            return res.json({ status: 'error', error: 'Invalid confirmation token' })
+            return res.sendFile(path.join(__dirname, 'confirmation-error.html'));
         }
 
-        user.isValid = true
-        user.confirmationToken = null
-        await user.save()
+        user.isValid = true;
+        user.confirmationToken = null;
+        await user.save();
 
-        res.json({ status: 'ok' })
+        res.sendFile(path.join(__dirname, 'confirmation-success.html'));
     } catch (err) {
-        console.log(err)
-        res.json({ status: 'error', error: 'Error confirming registration' });
+        console.log(err);
+        res.sendFile(path.join(__dirname, 'confirmation-error.html'));
     }
-})
+});
 
 // Login user, hashed password, and create jwt token
 app.post('/api/login', async (req, res) => {
