@@ -330,15 +330,15 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
 })
 
 app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
 
-    console.log('Updating profile')
-    console.log(req.file)
+    console.log('Updating profile');
+    console.log(req.file);
     try {
-        const user = await User.findOne({ id: req.body._id })
+        const user = await User.findOne({ _id: id });
 
         if (!user) {
-            return res.json({ status: 'error', error: 'User not found' })
+            return res.json({ status: 'error', error: 'User not found' });
         }
 
         const socialMediaLinks = [];
@@ -355,10 +355,11 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             console.error('req.body.socialMedia is not defined:', req.body);
         }
 
+        let fileName;
         if (req.file) {
             console.log('req file found');
         
-            const fileName = generateFileName();
+            fileName = generateFileName();
         
             const file = req.file;
         
@@ -388,37 +389,43 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         
         // Update the profile with the new data
         const updateData = {
-            'profile.firstName': req.body.firstName,
-            'profile.lastName': req.body.lastName,
-            'profile.phoneNumber': req.body.phoneNumber,
-            'profile.email': req.body.email,
-            'profile.position': req.body.position,
-            'profile.company': req.body.company,
-            'profile.about': req.body.about,
-            'profile.socialMedia': socialMediaLinks,
-            'profile.colours.primaryColour': req.body.primaryColour,
-            'profile.colours.cardColour': req.body.cardColour,
+            'profile.$[profileElem].firstName': req.body.firstName,
+            'profile.$[profileElem].lastName': req.body.lastName,
+            'profile.$[profileElem].phoneNumber': req.body.phoneNumber,
+            'profile.$[profileElem].email': req.body.email,
+            'profile.$[profileElem].position': req.body.position,
+            'profile.$[profileElem].company': req.body.company,
+            'profile.$[profileElem].about': req.body.about,
+            'profile.$[profileElem].socialMedia': socialMediaLinks,
+            'profile.$[profileElem].colours.$[colourElem].primaryColour': req.body.primaryColour,
+            'profile.$[profileElem].colours.$[colourElem].cardColour': req.body.cardColour,
         };
         
         // Conditionally update profilePhoto
         if (req.file) {
-            updateData['profile.colours.profilePhoto'] = fileName;
+            updateData['profile.$[profileElem].colours.$[colourElem].profilePhoto'] = fileName;
         }
         
         const profile = await Profile.findOneAndUpdate(
             { email: req.body.email },
             { $set: updateData },
-            { new: true } // Return the updated document
+            {
+                arrayFilters: [
+                    { 'profileElem._id': existingProfile.profile[0]._id },
+                    { 'colourElem._id': existingProfile.profile[0].colours[0]._id }
+                ],
+                new: true // Return the updated document
+            }
         );
         
         console.log('Profile updated', profile);
         
         res.json({ status: 'ok', data: profile });
     } catch (err) {
-        console.log(err)
-        res.json({ status: 'error', error: 'Invalid Profile' })
+        console.log(err);
+        res.json({ status: 'error', error: 'Invalid Profile' });
     }
-})
+});
 
 app.listen(8001, () => {
     console.log('Server started on port 8001')
