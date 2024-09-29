@@ -271,28 +271,6 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
 
         console.log('User:', user)
 
-        const profile = await Profile.create({
-            email: req.body.email,
-            username: user.username,
-            profile: {
-                firstName: req.body.firstName,
-                lastName: req.body.lastName,
-                phoneNumber: req.body.phoneNumber,
-                email: req.body.email,
-                position: req.body.position,
-                company: req.body.company,
-                about: req.body.about,
-                socialMedia: socialMediaLinks,
-                colours: {
-                    primaryColour: req.body.primaryColour,
-                    profilePhoto: fileName,
-                    cardColour: req.body.cardColour
-                }
-            }
-        })
-
-        console.log('profile created', profile)
-
         if (req.file) {
             const fileName = generateFileName()
 
@@ -314,6 +292,28 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
             // Send the upload to S3
             await s3.send(new PutObjectCommand(params))
         }
+
+        const profile = await Profile.create({
+            email: req.body.email,
+            username: user.username,
+            profile: {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                phoneNumber: req.body.phoneNumber,
+                email: req.body.email,
+                position: req.body.position,
+                company: req.body.company,
+                about: req.body.about,
+                socialMedia: socialMediaLinks,
+                colours: {
+                    primaryColour: req.body.primaryColour,
+                    profilePhoto: fileName && fileName,
+                    cardColour: req.body.cardColour
+                }
+            }
+        })
+
+        console.log('profile created', profile)
 
         res.json({ status: 'ok', data: profile })
     } catch (err) {
@@ -348,29 +348,6 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             console.error('req.body.socialMedia is not defined:', req.body);
         }
 
-        const profile = await Profile.findOneAndUpdate(
-            { email: req.body.email },
-            {
-                profile: {
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    phoneNumber: req.body.phoneNumber,
-                    email: req.body.email,
-                    position: req.body.position,
-                    company: req.body.company,
-                    about: req.body.about,
-                    socialMedia: socialMediaLinks,
-                    colours: {
-                        primaryColour: req.body.primaryColour,
-                        profilePhoto: fileName,
-                        cardColour: req.body.cardColour
-                    }
-                }
-            }
-        )
-
-        console.log('profile created', profile)
-
         if (req.file) {
             const fileName = generateFileName()
 
@@ -392,6 +369,29 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             // Send the upload to S3
             await s3.send(new PutObjectCommand(params))
         }
+
+        const profile = await Profile.findOneAndUpdate(
+            { email: req.body.email },
+            {
+                profile: {
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    phoneNumber: req.body.phoneNumber,
+                    email: req.body.email,
+                    position: req.body.position,
+                    company: req.body.company,
+                    about: req.body.about,
+                    socialMedia: socialMediaLinks,
+                    colours: {
+                        primaryColour: req.body.primaryColour,
+                        profilePhoto: fileName && fileName,
+                        cardColour: req.body.cardColour
+                    }
+                }
+            }
+        )
+
+        console.log('profile created', profile)
 
         res.json({ status: 'ok', data: profile })
     } catch (err) {
