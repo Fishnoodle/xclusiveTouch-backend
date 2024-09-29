@@ -272,28 +272,29 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
         console.log('User:', user)
 
         if (req.file) {
-            const fileName = generateFileName()
-
-            const file = req.file
-
+            const fileName = generateFileName();
+        
+            const file = req.file;
+        
             const fileBuffer = await sharp(file.buffer)
                 .resize({ width: 750, height: 750, fit: "contain" })
-                .toBuffer()
-    
+                .toBuffer();
+        
             const params = {
                 Bucket: bucketName,
                 Body: fileBuffer,
                 Key: fileName,
                 ContentType: file.mimetype,
-            }
-
-            console.log('S3 upload params:', params)
-    
+            };
+        
+            console.log('S3 upload params:', params);
+        
             // Send the upload to S3
-            await s3.send(new PutObjectCommand(params))
+            await s3.send(new PutObjectCommand(params));
         }
-
-        const profile = await Profile.create({
+        
+        // Prepare the profile data
+        const profileData = {
             email: req.body.email,
             username: user.username,
             profile: {
@@ -307,15 +308,21 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
                 socialMedia: socialMediaLinks,
                 colours: {
                     primaryColour: req.body.primaryColour,
-                    profilePhoto: fileName && fileName,
-                    cardColour: req.body.cardColour
+                    cardColour: req.body.cardColour,
                 }
             }
-        })
-
-        console.log('profile created', profile)
-
-        res.json({ status: 'ok', data: profile })
+        };
+        
+        // Conditionally add profilePhoto if fileName exists
+        if (req.file) {
+            profileData.profile.colours.profilePhoto = fileName;
+        }
+        
+        const profile = await Profile.create(profileData);
+        
+        console.log('profile created', profile);
+        
+        res.json({ status: 'ok', data: profile });
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Invalid Profile' })
@@ -349,51 +356,64 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         }
 
         if (req.file) {
-            const fileName = generateFileName()
-
-            const file = req.file
-
+            console.log('req file found');
+        
+            const fileName = generateFileName();
+        
+            const file = req.file;
+        
             const fileBuffer = await sharp(file.buffer)
                 .resize({ width: 750, height: 750, fit: "contain" })
-                .toBuffer()
-    
+                .toBuffer();
+        
             const params = {
                 Bucket: bucketName,
                 Body: fileBuffer,
                 Key: fileName,
                 ContentType: file.mimetype,
-            }
-
-            console.log('S3 upload params:', params)
-    
+            };
+        
+            console.log('S3 upload params:', params);
+        
             // Send the upload to S3
-            await s3.send(new PutObjectCommand(params))
+            await s3.send(new PutObjectCommand(params));
         }
-
+        
+        // Find the existing profile
+        const existingProfile = await Profile.findOne({ email: req.body.email });
+        
+        if (!existingProfile) {
+            return res.json({ status: 'error', error: 'Profile not found' });
+        }
+        
+        // Update the profile with the new data
+        const updateData = {
+            'profile.firstName': req.body.firstName,
+            'profile.lastName': req.body.lastName,
+            'profile.phoneNumber': req.body.phoneNumber,
+            'profile.email': req.body.email,
+            'profile.position': req.body.position,
+            'profile.company': req.body.company,
+            'profile.about': req.body.about,
+            'profile.socialMedia': socialMediaLinks,
+            'profile.colours.primaryColour': req.body.primaryColour,
+            'profile.colours.cardColour': req.body.cardColour,
+        };
+        
+        // Conditionally update profilePhoto
+        if (req.file) {
+            updateData['profile.colours.profilePhoto'] = fileName;
+        }
+        
         const profile = await Profile.findOneAndUpdate(
             { email: req.body.email },
-            {
-                profile: {
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    phoneNumber: req.body.phoneNumber,
-                    email: req.body.email,
-                    position: req.body.position,
-                    company: req.body.company,
-                    about: req.body.about,
-                    socialMedia: socialMediaLinks,
-                    colours: {
-                        primaryColour: req.body.primaryColour,
-                        profilePhoto: fileName && fileName,
-                        cardColour: req.body.cardColour
-                    }
-                }
-            }
-        )
-
-        console.log('profile created', profile)
-
-        res.json({ status: 'ok', data: profile })
+            { $set: updateData },
+            { new: true } // Return the updated document
+        );
+        
+        console.log('Profile updated', profile);
+        
+        res.json({ status: 'ok', data: profile });
     } catch (err) {
         console.log(err)
         res.json({ status: 'error', error: 'Invalid Profile' })
