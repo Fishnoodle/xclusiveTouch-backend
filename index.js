@@ -93,13 +93,13 @@ app.post('/api/register', async (req, res) => {
             text: `Please click this link to confirm your email: https://api.xclusivetouch.ca/api/confirm/${confirmationToken}`
         }
 
-        transporter.sendMail(mailOptions, function(error, info) {
-            if (error) {
-                console.log(error)
-            } else {
-                console.log('Email sent: ' + info.response)
-            }
-        })
+        // transporter.sendMail(mailOptions, function(error, info) {
+        //     if (error) {
+        //         console.log(error)
+        //     } else {
+        //         console.log('Email sent: ' + info.response)
+        //     }
+        // })
 
         res.json({ status: 'ok', user: user })
     } catch (err) {
@@ -141,9 +141,9 @@ app.post('/api/login', async (req, res) => {
 
     console.log(user, 'USER')
 
-    if (User.isValid === false) {
-        return res.json({ status: 'error', error: 'Please confirm your email' })
-    }
+    // if (User.isValid === false) {
+    //     return res.json({ status: 'error', error: 'Please confirm your email' })
+    // }
 
     if (!user) {
         return res.json({ status: 'error', error: 'Invalid email/password' })
@@ -245,7 +245,6 @@ app.get('/api/publicProfile/:username', async (req, res) => {
 app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
     console.log('Creating or updating profile')
     console.log(req.body)
-    const fileName = generateFileName()
 
     console.log('socialMedia:', req.body.socialMedia);
 
@@ -295,6 +294,8 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
         console.log('profile created', profile)
 
         if (req.file) {
+            const fileName = generateFileName()
+
             const file = req.file
 
             const fileBuffer = await sharp(file.buffer)
@@ -323,7 +324,6 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
 
 app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const id = req.params.id
-    const fileName = generateFileName()
 
     console.log('Updating profile')
     console.log(req.body.socialMedia)
@@ -372,6 +372,8 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         console.log('profile created', profile)
 
         if (req.file) {
+            const fileName = generateFileName()
+
             const file = req.file
 
             const fileBuffer = await sharp(file.buffer)
