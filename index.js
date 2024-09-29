@@ -312,6 +312,10 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
                 }
             }
         };
+
+        if (req.body.companyAddress) {
+            profileData.profile.companyAddress = req.body.companyAddress;
+        }
         
         // Conditionally add profilePhoto if fileName exists
         if (req.file) {
@@ -400,6 +404,10 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             'profile.$[profileElem].colours.$[colourElem].primaryColour': req.body.primaryColour,
             'profile.$[profileElem].colours.$[colourElem].cardColour': req.body.cardColour,
         };
+
+        if (req.body.companyAddress) {
+            updateData['profile.$[profileElem].companyAddress'] = req.body.companyAddress;
+        }
         
         // Conditionally update profilePhoto
         if (req.file) {
