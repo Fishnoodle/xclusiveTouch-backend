@@ -254,6 +254,7 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
     console.log('Creating or updating profile');
     console.log(req.body);
 
+
     console.log('socialMedia:', req.body.socialMedia);
 
     const socialMediaLinks = [];
@@ -322,12 +323,14 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
             }
         };
 
+        console.log(req.file ? 'req file found ' + fileName : 'req file not found');
+
         if (req.body.companyAddress) {
             profileData.profile.companyAddress = req.body.companyAddress;
         }
 
         // Conditionally add profilePhoto if fileName exists
-        if (fileName) {
+        if (req.file) {
             profileData.profile.colours.profilePhoto = fileName;
         }
 
