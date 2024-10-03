@@ -1,23 +1,28 @@
-const express = require('express')
-const cors = require('cors')
-const mongoose = require('mongoose')
-const jwt = require('jsonwebtoken')
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const fs = require('fs')
-const https = require('https')
+const fs = require('fs');
+const https = require('https');
 const multer = require('multer');
 const sharp = require('sharp');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const path = require('path');
 
-// env imports
-require('dotenv').config()
+// Email Template
+const React = require('react');
+const ReactDOMServer = require('react-dom/server');
+const Email = require('./templates/email');
 
-const bucketName = process.env.BUCKET_NAME
-const region = process.env.BUCKET_REGION
-const accessKeyId = process.env.ACCESS_KEY
-const secretAccessKey = process.env.SECRET_ACCESS_KEY
+// env imports
+require('dotenv').config();
+
+const bucketName = process.env.BUCKET_NAME;
+const region = process.env.BUCKET_REGION;
+const accessKeyId = process.env.ACCESS_KEY;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 
 const s3 = new S3Client({
     region,
@@ -25,33 +30,32 @@ const s3 = new S3Client({
         accessKeyId,
         secretAccessKey,
     }
-})
+});
 
 // Emails imports 
-const crypto = require('crypto')
-const nodemailer = require('nodemailer')
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 // Models
-const User = require('./models/user.model')
-const Profile = require('./models/profile.model')
+const User = require('./models/user.model');
+const Profile = require('./models/profile.model');
 
-
-const app = express()
+const app = express();
 
 app.use(cors({ origin: '*', credentials: true }));
-app.use(express.json())
+app.use(express.json());
 
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const generateFileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
 // Mongoose connection
 try {
-    mongoose.connect('mongodb+srv://Dev123:Mikey2024@xclusivetouch.gs88nsy.mongodb.net/?retryWrites=true&w=majority&appName=XclusiveTouch')
-    console.log('MongoDB connected')
+    mongoose.connect('mongodb+srv://Dev123:Mikey2024@xclusivetouch.gs88nsy.mongodb.net/?retryWrites=true&w=majority&appName=XclusiveTouch');
+    console.log('MongoDB connected');
 } catch (err) {
-    console.log(err)
+    console.log(err);
 }
 
 /*
@@ -62,21 +66,21 @@ USER MODEL
 
 // Creates user, hashed password & checks for duplicate email
 app.post('/api/register', async (req, res) => {
-    console.log('Registering user')
+    console.log('Registering user');
 
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)
-        console.log('Hashed Password:', hashedPassword) // Debug
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        console.log('Hashed Password:', hashedPassword); // Debug
 
-        const confirmationToken = crypto.randomBytes(20).toString('hex')
+        const confirmationToken = crypto.randomBytes(20).toString('hex');
 
         const user = await User.create({
             email: req.body.email,
             password: hashedPassword,
             username: req.body.username,
-            isValid: false,
+            isValid: true,
             confirmationToken: confirmationToken
-        })
+        });
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -84,29 +88,33 @@ app.post('/api/register', async (req, res) => {
                 user: process.env.EMAIL_USERNAME,
                 pass: process.env.EMAIL_PASSWORD
             }
-        })
+        });
+
+        const emailHtml = ReactDOMServer.renderToStaticMarkup(
+            React.createElement(Email, { userFirstname: req.body.username })
+        );
 
         const mailOptions = {
             from: process.env.EMAIL_USERNAME,
             to: req.body.email,
-            subject: 'Confirm Email',
-            text: `Please click this link to confirm your email: https://api.xclusivetouch.ca/api/confirm/${confirmationToken}`
-        }
+            subject: 'Welcome to Xclusive Touch Digital Business Cards',
+            html: emailHtml
+        };
 
-        // transporter.sendMail(mailOptions, function(error, info) {
-        //     if (error) {
-        //         console.log(error)
-        //     } else {
-        //         console.log('Email sent: ' + info.response)
-        //     }
-        // })
+        transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
 
-        res.json({ status: 'ok', user: user })
+        res.json({ status: 'ok', user: user });
     } catch (err) {
-        console.log(err)
-        res.json({ status: 'error', error: 'Duplicate email' })
+        console.log(err);
+        res.json({ status: 'error', error: 'Duplicate email' });
     }
-})
+});
 
 // Confirmation email - token
 app.get('/api/confirm/:token', async (req, res) => {
