@@ -26,8 +26,8 @@ const profile = new mongoose.Schema(
                 other: { type: String },
             }],
             colours: [{
-                primaryColour: { type: String, required: true },
-                profilePhoto: { type: String, required: true },
+                primaryColour: { type: String },
+                profilePhoto: { type: String },
                 cardColour: { type: String },
             }]
         }],

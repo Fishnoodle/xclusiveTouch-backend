@@ -251,56 +251,57 @@ app.get('/api/publicProfile/:username', async (req, res) => {
 })
 
 app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
-    console.log('Creating or updating profile')
-    console.log(req.body)
+    console.log('Creating or updating profile');
+    console.log(req.body);
 
     console.log('socialMedia:', req.body.socialMedia);
 
     const socialMediaLinks = [];
-        if (req.body.socialMedia) {
-            const socialMedia = JSON.parse(req.body.socialMedia);
-            socialMedia.forEach((item) => {
-                const platform = item.platform;
-                const link = item.link;
-                if (platform) {
-                    socialMediaLinks.push({ [platform.toLowerCase()]: link });
-                }
-            });
-        } else {
-            console.error('req.body.socialMedia is not defined:', req.body);
-        }
+    if (req.body.socialMedia) {
+        const socialMedia = JSON.parse(req.body.socialMedia);
+        socialMedia.forEach((item) => {
+            const platform = item.platform;
+            const link = item.link;
+            if (platform) {
+                socialMediaLinks.push({ [platform.toLowerCase()]: link });
+            }
+        });
+    } else {
+        console.error('req.body.socialMedia is not defined:', req.body);
+    }
 
     try {
-        const user = await User.findOne({ email: req.body.email })
+        const user = await User.findOne({ email: req.body.email });
 
         if (!user) {
-            return res.status(404).json({status: 'error', error: 'User not found'})
+            return res.status(404).json({ status: 'error', error: 'User not found' });
         }
 
-        console.log('User:', user)
+        console.log('User:', user);
 
+        let fileName;
         if (req.file) {
-            const fileName = generateFileName();
-        
+            fileName = generateFileName();
+
             const file = req.file;
-        
+
             const fileBuffer = await sharp(file.buffer)
                 .resize({ width: 750, height: 750, fit: "contain" })
                 .toBuffer();
-        
+
             const params = {
                 Bucket: bucketName,
                 Body: fileBuffer,
                 Key: fileName,
                 ContentType: file.mimetype,
             };
-        
+
             console.log('S3 upload params:', params);
-        
+
             // Send the upload to S3
             await s3.send(new PutObjectCommand(params));
         }
-        
+
         // Prepare the profile data
         const profileData = {
             email: req.body.email,
@@ -324,22 +325,22 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
         if (req.body.companyAddress) {
             profileData.profile.companyAddress = req.body.companyAddress;
         }
-        
+
         // Conditionally add profilePhoto if fileName exists
-        if (req.file) {
+        if (fileName) {
             profileData.profile.colours.profilePhoto = fileName;
         }
-        
+
         const profile = await Profile.create(profileData);
-        
+
         console.log('profile created', profile);
-        
+
         res.json({ status: 'ok', data: profile });
     } catch (err) {
-        console.log(err)
-        res.json({ status: 'error', error: 'Invalid Profile' })
+        console.log(err);
+        res.json({ status: 'error', error: 'Invalid Profile' });
     }
-})
+});
 
 app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
     const id = req.params.id;

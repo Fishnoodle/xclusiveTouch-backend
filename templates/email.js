@@ -62,7 +62,7 @@ function Email(props) {
         React.createElement(
           Text,
           { style: paragraph },
-          'Welcome to Xclusive Touch Digital Business Card! We are thrilled to have you on board.'
+          'Welcome to Xclusive Touch! We are thrilled to have you on board.'
         ),
         React.createElement(
           Text,
@@ -75,7 +75,7 @@ function Email(props) {
         React.createElement(
           Text,
           { style: paragraph },
-          'If you have any questions or need support, our customer service team is here to help! Feel free to reply to this email or call (778-829-0947).'
+          'If you have any questions or need support, our customer service team is here to help! Feel free to reply to this email.'
         ),
         React.createElement(
           Text,
