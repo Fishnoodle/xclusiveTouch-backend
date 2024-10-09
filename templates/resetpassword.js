@@ -50,7 +50,7 @@ function ResetPassword(props) {
                 React.createElement(
                     Section,
                     { style: btnContainer },
-                    React.createElement(Button, { style: button, href: `https://www.xclusivetouch.ca/resetpassword/${id}`, target: '_blank'}, 'Reset Password')
+                    React.createElement(Button, { style: button, href: `https://www.xclusivetouch.ca/confirmpassword/${id}`, target: '_blank'}, 'Reset Password')
                 ),
                 React.createElement(
                     Text,
