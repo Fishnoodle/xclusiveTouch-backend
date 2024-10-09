@@ -39,6 +39,7 @@ const nodemailer = require('nodemailer');
 // Models
 const User = require('./models/user.model');
 const Profile = require('./models/profile.model');
+const ResetPassword = require('./templates/resetpassword');
 
 const app = express();
 
@@ -135,6 +136,82 @@ app.get('/api/confirm/:token', async (req, res) => {
         res.sendFile(path.join(__dirname, 'confirmation-error.html'));
     }
 });
+
+app.post('/api/forgotpassword', async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.body.email });
+
+        if (!user) {
+            return res.json({ status: 'error', error: 'User not found' });
+        }
+
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        user.resetToken = resetToken;
+        user.resetTokenExpiration = Date.now() + 900000; // 15 minutes in milliseconds
+        await user.save();
+
+        console.log('Updated user:', user);
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        const emailHtml = ReactDOMServer.renderToStaticMarkup(
+            React.createElement(ResetPassword, { userFirstname: user.username, id: resetToken })
+        );
+
+        const mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            to: req.body.email,
+            subject: 'Welcome to Xclusive Touch Digital Business Cards',
+            html: emailHtml
+        };
+
+        transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+
+        res.json({ status: 'ok', user: user });
+    } catch (err) {
+        console.log(err);
+        res.json({ status: 'error', error: 'Unable to retrieve' });
+    }
+})
+
+app.post('/api/confirmreset/:id', async (req, res) => {
+    try {
+        const user = await User.findOne({ resetToken: req.params.id });
+
+        if (!user) {
+            return res.json({ status: 'error', error: 'Invalid token' });
+        }
+
+        // Check if the reset token has expired
+        if (Date.now() > user.resetTokenExpiration) {
+            return res.json({ status: 'error', error: 'Expired token' });
+        }
+
+
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        user.password = hashedPassword;
+        user.resetToken = null;
+        user.resetTokenExpiration = null;
+        await user.save();
+
+        res.json({ status: 'ok', user: user });
+    } catch (err) {
+        console.log(err);
+        res.json({ status: 'error', error: 'Invalid token' });
+    }
+})
 
 // Login user, hashed password, and create jwt token
 app.post('/api/login', async (req, res) => {

@@ -6,7 +6,9 @@ const User = new mongoose.Schema(
         username: { type: String },
         password: { type: String, required: true },
         isValid: { type: Boolean, default: false},
-        confirmationToken: { type: String }
+        confirmationToken: { type: String },
+        resetToken: { type: String },
+        resetTokenExpiration: { type: Date },
     },
     { collection: 'users'}
 )

@@ -52,7 +52,7 @@ function Email(props) {
         Container,
         { style: container },
         React.createElement(Img, {
-            src: 'https://xclusivetouch.ca/assets/logo.png',
+            src: 'https://xclusivetouch.ca/assets/gold_blackbackground.png',
             width: '200',
             height: '150',
             alt: 'Xclusive Touch Logo',
