@@ -305,32 +305,39 @@ app.get('/api/profile/:id', async (req, res) => {
 })
 
 app.get('/api/publicProfile/:username', async (req, res) => {
-    const username = req.params.username
-    console.log('Getting public profile')
+    console.log('Getting public profile');
+    console.log(req.params.username);
+
     try {
-        const profile = await Profile.findOne({ username: username })
+        // Convert the username to lowercase before querying the database
+        const username = req.params.username.toLowerCase();
+        const profile = await Profile.findOne({ username });
+
+        if (!profile) {
+            return res.json({ status: 'error', error: 'Profile not found' });
+        }
 
         const params = {
             Bucket: bucketName,
             Key: profile.profile[0].colours[0].profilePhoto
-        }
+        };
 
-        const command = new GetObjectCommand(params)
-        const seconds = 60
-        const url = await getSignedUrl(s3, command, { expiresIn: seconds })
+        const command = new GetObjectCommand(params);
+        const seconds = 60;
+        const url = await getSignedUrl(s3, command, { expiresIn: seconds });
 
         // Set a timeout to generate a new pre-signed URL when the previous one expires
         setTimeout(async () => {
-            const newUrl = await getSignedUrl(s3, command, { expiresIn: seconds })
-            console.log('New pre-signed URL:', newUrl)
-        }, seconds * 1000)
+            const newUrl = await getSignedUrl(s3, command, { expiresIn: seconds });
+            console.log('New pre-signed URL:', newUrl);
+        }, seconds * 1000);
 
-        return res.json({ status: 'ok', data: profile, url: url })
+        return res.json({ status: 'ok', data: profile, url: url });
     } catch (err) {
-        console.log(err)
-        res.json({ status: 'error', error: 'Invalid Profile' })
+        console.log(err);
+        res.json({ status: 'error', error: 'Invalid Profile' });
     }
-})
+});
 
 app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
     console.log('Creating or updating profile');
@@ -388,7 +395,7 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
         // Prepare the profile data
         const profileData = {
             email: req.body.email,
-            username: user.username,
+            username: user.username.toLowerCase(),
             profile: {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
