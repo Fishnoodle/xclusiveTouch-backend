@@ -190,8 +190,10 @@ app.post('/api/confirmreset/:id', async (req, res) => {
     try {
         const user = await User.findOne({ resetToken: req.params.id });
 
+        console.log(req.params.id, 'RESET TOKEN')
+
         if (!user) {
-            return res.json({ status: 'error', error: 'Invalid token' });
+            return res.json({ status: 'error', error: 'User not found' });
         }
 
         // Check if the reset token has expired
