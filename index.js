@@ -199,6 +199,9 @@ app.post('/api/confirmreset/:id', async (req, res) => {
             return res.json({ status: 'error', error: 'Expired token' });
         }
 
+        if (req.body.password !== req.body.confirmPassword) {
+            return res.json({ status: 'error', error: 'Passwords do not match' });
+        }
 
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         user.password = hashedPassword;
