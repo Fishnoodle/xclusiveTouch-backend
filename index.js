@@ -554,6 +554,8 @@ app.post('/api/exchangeContact/:id', async (req, res) => {
             }
         });
 
+        console.log(user)
+
         const emailHtml = ReactDOMServer.renderToStaticMarkup(
             React.createElement(ExchangeContact, { user: user.profile[0].firstName, name: req.body.name, email: req.body.email, message: req.body.message })
         );
@@ -572,6 +574,8 @@ app.post('/api/exchangeContact/:id', async (req, res) => {
                 console.log('Email sent: ' + info.response);
             }
         });
+
+        console.log('Email sent to:', user.email);
 
         res.json({ status: 'ok', user: user.email });
     } catch (err) {
