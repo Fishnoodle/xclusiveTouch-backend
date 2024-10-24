@@ -544,7 +544,8 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
 
 app.post('/api/exchangeContact/:id', async (req, res) => {
     try {
-        const user = await Profile.findOne({ _id: req.params.id });
+        const id = req.params.id;
+        const user = await Profile.findOne({ _id: id });
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -553,8 +554,6 @@ app.post('/api/exchangeContact/:id', async (req, res) => {
                 pass: process.env.EMAIL_PASSWORD
             }
         });
-
-        console.log(user)
 
         const emailHtml = ReactDOMServer.renderToStaticMarkup(
             React.createElement(ExchangeContact, { user: user.profile[0].firstName, name: req.body.name, email: req.body.email, message: req.body.message })
