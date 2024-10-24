@@ -506,7 +506,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             'profile.$[profileElem].position': req.body.position,
             'profile.$[profileElem].company': req.body.company,
             'profile.$[profileElem].about': req.body.about,
-            'profile.$[profileElem].socialMedia': socialMediaLinks,
+            'profile.$[profileElem].socialMedia': socialMediaLinks, // Directly set the entire socialMedia array
             'profile.$[profileElem].colours.$[colourElem].primaryColour': req.body.primaryColour,
             'profile.$[profileElem].colours.$[colourElem].cardColour': req.body.cardColour,
         };
