@@ -1,3 +1,5 @@
+const React = require('react');
+const ReactDOMServer = require('react-dom/server');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -12,8 +14,6 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const path = require('path');
 
 // Email Template
-const React = require('react');
-const ReactDOMServer = require('react-dom/server');
 const Email = require('./templates/email');
 
 // env imports
@@ -40,6 +40,7 @@ const nodemailer = require('nodemailer');
 const User = require('./models/user.model');
 const Profile = require('./models/profile.model');
 const ResetPassword = require('./templates/resetpassword');
+const ExchangeContact = require('./templates/exchangecontact');
 
 const app = express();
 
@@ -506,7 +507,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
             'profile.$[profileElem].position': req.body.position,
             'profile.$[profileElem].company': req.body.company,
             'profile.$[profileElem].about': req.body.about,
-            'profile.$[profileElem].socialMedia': JSON.stringify(socialMediaLinks), // Directly set the entire socialMedia array
+            'profile.$[profileElem].socialMedia': (socialMediaLinks), // Directly set the entire socialMedia array
             'profile.$[profileElem].colours.$[colourElem].primaryColour': req.body.primaryColour,
             'profile.$[profileElem].colours.$[colourElem].cardColour': req.body.cardColour,
         };
@@ -540,6 +541,44 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         res.json({ status: 'error', error: 'Invalid Profile' });
     }
 });
+
+app.post('/api/exchangeContact/:id', async (req, res) => {
+    try {
+        const user = await Profile.findOne({ _id: req.params.id });
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USERNAME,
+                pass: process.env.EMAIL_PASSWORD
+            }
+        });
+
+        const emailHtml = ReactDOMServer.renderToStaticMarkup(
+            React.createElement(ExchangeContact, { user: user.profile[0].firstName, name: req.body.name, email: req.body.email, message: req.body.message })
+        );
+
+        const mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            to: user.email,
+            subject: 'Xclusive Touch - Exchange Contact',
+            html: emailHtml
+        }
+
+        transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+
+        res.json({ status: 'ok', user: user.email });
+    } catch (err) {
+        console.log(err);
+        res.json({ status: 'error', error: 'Unable to send exchange'})
+    }
+})
 
 app.listen(8001, () => {
     console.log('Server started on port 8001')
