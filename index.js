@@ -445,20 +445,25 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         if (!user) {
             return res.json({ status: 'error', error: 'User not found' });
         }
-
+        
         const socialMediaLinks = [];
         if (req.body.socialMedia) {
             const socialMedia = JSON.parse(req.body.socialMedia);
-            socialMedia.forEach((item) => {
+            socialMedia.forEach((item, index) => {
                 const platform = item.platform;
                 const link = item.link;
+                console.log(`Processing item ${index}:`, item); // Debugging statement
                 if (platform) {
                     socialMediaLinks.push({ [platform.toLowerCase()]: link });
+                } else {
+                    console.error(`Platform is not defined for item ${index}:`, item);
                 }
             });
         } else {
             console.error('req.body.socialMedia is not defined:', req.body);
         }
+
+        console.log('Constructed socialMediaLinks:', socialMediaLinks); // Debugging statement
 
         let fileName;
         if (req.file) {
