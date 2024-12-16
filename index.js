@@ -237,10 +237,15 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ status: 'error', error: 'Invalid email/password' });
         }
 
-        // Try to find a user with matching password
-        const validUser = users.find(async (user) => {
-            return await bcrypt.compare(req.body.password, user.password);
-        });
+        // Async function to find valid user
+        let validUser = null;
+        for (const user of users) {
+            const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
+            if (isPasswordValid) {
+                validUser = user;
+                break;
+            }
+        }
 
         // If no valid user found
         if (!validUser) {
@@ -257,7 +262,11 @@ app.post('/api/login', async (req, res) => {
             'secret123'
         )
 
-        return res.json({ status: 'ok', user: validUser._id });
+        return res.json({ 
+            status: 'ok', 
+            user: validUser._id,
+            username: validUser.username // Optional: return username as well
+        });
 
     } catch (err) {
         console.error('Login process error:', err);
