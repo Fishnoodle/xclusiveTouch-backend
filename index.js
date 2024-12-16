@@ -223,23 +223,33 @@ app.post('/api/confirmreset/:id', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         console.log('Logging in user')
-
-        console.log(req.body.email, req.body.password)
+        console.log('Request body:', req.body)
 
         const user = await User.findOne({
             email: req.body.email,
         })
 
+        console.log('User found:', user)
+
         if (!user) {
+            console.log('No user found with this email')
             return res.json({ status: 'error', error: 'Invalid email/password' })
         }
+
+        console.log('Comparing passwords:')
+        console.log('Input password:', req.body.password)
+        console.log('Stored hashed password:', user.password)
 
         const isPasswordValid = await bcrypt.compare(req.body.password, user.password)
 
+        console.log('Password validation result:', isPasswordValid)
+
         if (!isPasswordValid) {
+            console.log('Password validation failed')
             return res.json({ status: 'error', error: 'Invalid email/password' })
         }
 
+        console.log('Generating JWT token')
         const token = jwt.sign(
             {
                 name: user.name,
@@ -248,9 +258,11 @@ app.post('/api/login', async (req, res) => {
             'secret123'
         )
 
+        console.log('Token generated successfully')
+
         return res.json({ status: 'ok', user: token })
     } catch (err) {
-        console.log(err)
+        console.error('Login process error:', err)
         res.json({ status: 'error', error: 'Invalid email/password' })
     }
 })
