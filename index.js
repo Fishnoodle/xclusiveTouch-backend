@@ -222,44 +222,37 @@ app.post('/api/confirmreset/:id', async (req, res) => {
 // Login user, hashed password, and create jwt token
 app.post('/api/login', async (req, res) => {
     try {
-    console.log('Loggin in user')
+        console.log('Logging in user')
 
-    console.log(req.body.email, req.body.password)
+        console.log(req.body.email, req.body.password)
 
-    const user = await User.findOne({
-        email: req.body.email,
-    })
+        const user = await User.findOne({
+            email: req.body.email,
+        })
 
-    if (!user || user.length === 0) {
-        return res.json({ status: 'error', error: 'Invalid email/password' })
-    }
-
-    let validUser = null
-    for (const user of user) {
-        const isPasswordValid = await bcrypt.compare(req.body.password, user.password)
-        if (isPasswordValid) {
-            validUser = user
-            break
+        if (!user) {
+            return res.json({ status: 'error', error: 'Invalid email/password' })
         }
+
+        const isPasswordValid = await bcrypt.compare(req.body.password, user.password)
+
+        if (!isPasswordValid) {
+            return res.json({ status: 'error', error: 'Invalid email/password' })
+        }
+
+        const token = jwt.sign(
+            {
+                name: user.name,
+                email: user.email
+            },
+            'secret123'
+        )
+
+        return res.json({ status: 'ok', user: token })
+    } catch (err) {
+        console.log(err)
+        res.json({ status: 'error', error: 'Invalid email/password' })
     }
-
-    if (!validUser) {
-        return res.json({ status: 'error', error: 'Invalid email/password' })
-    }
-
-    const token = jwt.sign(
-        {
-            name: user.name,
-            email: user.email
-        },
-        'secret123'
-    )
-
-    return res.json({ status: 'ok', user: token })
-} catch (err) {
-    console.log(err)
-    res.json({ status: 'error', error: 'Invalid email/password' })
-}
 })
 
 /*
