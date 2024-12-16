@@ -219,51 +219,49 @@ app.post('/api/confirmreset/:id', async (req, res) => {
     }
 })
 
-// Login user, hashed password, and create jwt token
 app.post('/api/login', async (req, res) => {
     try {
-        console.log('Logging in user')
-        console.log('Request body:', req.body)
+        console.log('Login attempt');
+        console.log('Email:', req.body.email);
 
-        const user = await User.findOne({
+        // Find ALL users with this email
+        const users = await User.find({
             email: req.body.email,
         })
 
-        console.log('User found:', user)
+        console.log('Number of users found:', users.length);
 
-        if (!user) {
-            console.log('No user found with this email')
-            return res.json({ status: 'error', error: 'Invalid email/password' })
+        // If no users found
+        if (users.length === 0) {
+            console.log('No user found with email:', req.body.email);
+            return res.status(400).json({ status: 'error', error: 'Invalid email/password' });
         }
 
-        console.log('Comparing passwords:')
-        console.log('Input password:', req.body.password)
-        console.log('Stored hashed password:', user.password)
+        // Try to find a user with matching password
+        const validUser = users.find(async (user) => {
+            return await bcrypt.compare(req.body.password, user.password);
+        });
 
-        const isPasswordValid = await bcrypt.compare(req.body.password, user.password)
-
-        console.log('Password validation result:', isPasswordValid)
-
-        if (!isPasswordValid) {
-            console.log('Password validation failed')
-            return res.json({ status: 'error', error: 'Invalid email/password' })
+        // If no valid user found
+        if (!validUser) {
+            console.log('No user found with matching password');
+            return res.status(400).json({ status: 'error', error: 'Invalid email/password' });
         }
 
-        console.log('Generating JWT token')
+        // Create token for the valid user
         const token = jwt.sign(
             {
-                name: user.name,
-                email: user.email
+                name: validUser.name,
+                email: validUser.email
             },
             'secret123'
         )
 
-        console.log('Token generated successfully')
+        return res.json({ status: 'ok', user: token });
 
-        return res.json({ status: 'ok', user: token })
     } catch (err) {
-        console.error('Login process error:', err)
-        res.json({ status: 'error', error: 'Invalid email/password' })
+        console.error('Login process error:', err);
+        res.status(500).json({ status: 'error', error: 'Internal server error' });
     }
 })
 
