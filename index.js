@@ -357,7 +357,8 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ username: req.body.username });
+        const username = (req.body.firstName + req.body.lastName).toLowerCase();
+        const user = await User.findOne({ username: username });
 
         if (!user) {
             return res.status(404).json({ status: 'error', error: 'User not found' });
@@ -487,7 +488,8 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         }
         
         // Find the existing profile
-        const existingProfile = await Profile.findOne({ email: req.body.username });
+        const username = (req.body.firstName + req.body.lastName).toLowerCase();
+        const existingProfile = await Profile.findOne({ username: username });
         
         if (!existingProfile) {
             return res.json({ status: 'error', error: 'Profile not found' });
