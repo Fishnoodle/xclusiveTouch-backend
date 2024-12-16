@@ -114,7 +114,7 @@ app.post('/api/register', async (req, res) => {
         res.json({ status: 'ok', user: user });
     } catch (err) {
         console.log(err);
-        res.json({ status: 'error', error: 'Duplicate email' });
+        res.json({ status: 'error', error: 'Incorrect' });
     }
 });
 
@@ -230,40 +230,32 @@ app.post('/api/login', async (req, res) => {
         email: req.body.email,
     })
 
-    console.log(user, 'USER')
-
-    // if (User.isValid === false) {
-    //     return res.json({ status: 'error', error: 'Please confirm your email' })
-    // }
-
-    if (!user) {
+    if (!users || users.length === 0) {
         return res.json({ status: 'error', error: 'Invalid email/password' })
     }
 
-    console.log('Stored Hashed Password:', user.password); // Debug log
-    console.log('Entered Password:', req.body.password); // Debug log
-
-    const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
-    console.log('Is Password Valid:', isPasswordValid); // Debug log
-
-
-    console.log(isPasswordValid, 'IS PASSWORD VALID')
-
-    if (isPasswordValid) {
-        const token = jwt.sign(
-            {
-                name: user.name,
-                email: user.email
-            },
-            'secret123'
-        )
-
-        res.cookie('token', token, { httpOnly: true });
-
-        return res.json({ status: 'ok', user: user, data: token })
-    } else {
-        return res.json({ status: 'error', error: 'Incorrect Credentials'})
+    let validUser = null
+    for (const user of users) {
+        const isPasswordValid = await bcrypt.compare(req.body.password, user.password)
+        if (isPasswordValid) {
+            validUser = user
+            break
+        }
     }
+
+    if (!validUser) {
+        return res.json({ status: 'error', error: 'Invalid email/password' })
+    }
+
+    const token = jwt.sign(
+        {
+            name: user.name,
+            email: user.email
+        },
+        'secret123'
+    )
+
+    return res.json({ status: 'ok', user: token })
 } catch (err) {
     console.log(err)
     res.json({ status: 'error', error: 'Invalid email/password' })
@@ -281,7 +273,7 @@ app.get('/api/profile/:id', async (req, res) => {
     console.log('Getting profile')
     try {
         const user = await User.findOne({ _id: id })
-        const profile = await Profile.findOne({ email: user.email })
+        const profile = await Profile.findOne({ username: user.username })
 
         const params = {
             Bucket: bucketName,
@@ -362,7 +354,7 @@ app.post('/api/profile', upload.single('profilePhoto'), async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ email: req.body.email });
+        const user = await User.findOne({ username: req.body.username });
 
         if (!user) {
             return res.status(404).json({ status: 'error', error: 'User not found' });
@@ -492,7 +484,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
         }
         
         // Find the existing profile
-        const existingProfile = await Profile.findOne({ email: req.body.email });
+        const existingProfile = await Profile.findOne({ email: req.body.username });
         
         if (!existingProfile) {
             return res.json({ status: 'error', error: 'Profile not found' });
@@ -545,7 +537,7 @@ app.put('/api/profile/:id', upload.single('profilePhoto'), async (req, res) => {
 app.post('/api/exchangeContact/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        const user = await Profile.findOne({ _id: id });
+        const user = await Profile.findOne({ _id: id }); // Find the user's profile
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
