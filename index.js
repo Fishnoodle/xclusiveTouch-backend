@@ -230,12 +230,12 @@ app.post('/api/login', async (req, res) => {
         email: req.body.email,
     })
 
-    if (!users || users.length === 0) {
+    if (!user || user.length === 0) {
         return res.json({ status: 'error', error: 'Invalid email/password' })
     }
 
     let validUser = null
-    for (const user of users) {
+    for (const user of user) {
         const isPasswordValid = await bcrypt.compare(req.body.password, user.password)
         if (isPasswordValid) {
             validUser = user
