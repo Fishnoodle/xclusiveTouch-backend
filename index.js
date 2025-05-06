@@ -265,7 +265,8 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             status: 'ok', 
             user: validUser._id,
-            username: validUser.username // Optional: return username as well
+            username: validUser.username, // Optional: return username as well
+            token: token // Include token in response
         });
 
     } catch (err) {
@@ -273,6 +274,43 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ status: 'error', error: 'Internal server error' });
     }
 })
+
+// Add this endpoint to your backend
+app.post('/api/verify-token', (req, res) => {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.json({ status: 'error', message: 'No token provided' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    
+    try {
+      // Verify the token using your JWT secret
+      const decoded = jwt.verify(token, 'secret123'); // Use your actual secret from your login endpoint
+      
+      // Check if user exists (optional extra security)
+      User.findOne({ email: decoded.email })
+        .then(user => {
+          if (!user) {
+            return res.json({ status: 'error', message: 'User not found' });
+          }
+          
+          // Token is valid and user exists
+          return res.json({ 
+            status: 'ok',
+            userId: user._id
+          });
+        })
+        .catch(err => {
+          console.error('Error finding user:', err);
+          return res.json({ status: 'error', message: 'Database error' });
+        });
+    } catch (error) {
+      // Token verification failed
+      return res.json({ status: 'error', message: 'Invalid token' });
+    }
+});
 
 /*
 -------------
