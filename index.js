@@ -16,23 +16,25 @@ const path = require('path');
 // Email Template
 const Email = require('./templates/email');
 
-// env imports - Support local, staging, and production environments
+// env imports - Support local, staging, and production
 const productionEnvPath = '/root/config/xclusiveTouch.env';
 const stagingEnvPath = '/root/config/xclusiveTouch.staging.env';
 
-// Check NODE_ENV and load appropriate configuration
-if (process.env.NODE_ENV === 'staging' && fs.existsSync(stagingEnvPath)) {
-    // Staging environment
-    require('dotenv').config({ path: stagingEnvPath });
-    console.log('✅ Loaded STAGING environment from:', stagingEnvPath);
-    console.log('🔧 Environment: STAGING');
-} else if (fs.existsSync(productionEnvPath)) {
-    // Production environment (DigitalOcean droplet)
+// Check NODE_ENV FIRST, then check file existence
+if (process.env.NODE_ENV === 'staging') {
+    if (fs.existsSync(stagingEnvPath)) {
+        require('dotenv').config({ path: stagingEnvPath });
+        console.log('✅ Loaded STAGING environment from:', stagingEnvPath);
+        console.log('🔧 Environment: STAGING');
+    } else {
+        console.error('❌ Staging env file not found:', stagingEnvPath);
+        process.exit(1);
+    }
+} else if (process.env.NODE_ENV === 'production' || fs.existsSync(productionEnvPath)) {
     require('dotenv').config({ path: productionEnvPath });
     console.log('✅ Loaded PRODUCTION environment from:', productionEnvPath);
     console.log('🔧 Environment: PRODUCTION');
 } else {
-    // Local development environment
     require('dotenv').config();
     console.log('✅ Loaded LOCAL development environment from: .env');
     console.log('🔧 Environment: LOCAL');
