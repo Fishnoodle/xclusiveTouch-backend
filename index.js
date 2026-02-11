@@ -17,7 +17,8 @@ const path = require('path');
 const Email = require('./templates/email');
 
 // env imports
-require('dotenv').config();
+require('dotenv').config({ path: '/root/config/xclusiveTouch.env' });
+
 
 const bucketName = process.env.BUCKET_NAME;
 const region = process.env.BUCKET_REGION;
