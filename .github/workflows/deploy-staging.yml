@@ -1,14 +1,14 @@
-name: Deploy Production to DigitalOcean
+name: Deploy Staging to DigitalOcean
 
 on:
   push:
     branches:
-      - main
+      - staging
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
   deploy:
-    name: SSH Deploy Production
+    name: SSH Deploy Staging
     runs-on: ubuntu-latest
 
     steps:
@@ -24,35 +24,35 @@ jobs:
           ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
           echo "✅ SSH setup complete."
 
-      - name: Deploy Production to Droplet
+      - name: Deploy Staging to Droplet
         run: |
-          echo "🚀 Connecting to droplet for PRODUCTION deployment..."
+          echo "🚀 Connecting to droplet for STAGING deployment..."
 
           ssh -p ${{ secrets.DROPLET_PORT }} ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
           set -e  # Exit on any error
 
-          echo "📂 Moving to PRODUCTION app directory..."
-          cd /root/xclusiveTouch-backend
+          echo "📂 Moving to STAGING app directory..."
+          cd /root/xclusiveTouch-backend-staging
 
-          echo "📥 Pulling latest production code..."
-          git pull origin main
+          echo "📥 Pulling latest staging code..."
+          git pull origin staging
 
           echo "📦 Installing dependencies..."
           npm install --production
 
-          echo "🔄 Reloading PM2 for PRODUCTION..."
-          pm2 reload xclusive-production || pm2 restart xclusive-production
+          echo "🔄 Reloading PM2 for STAGING..."
+          pm2 reload xclusive-staging || pm2 restart xclusive-staging
 
           echo "📊 PM2 Status:"
           pm2 status
 
-          echo "📝 Recent PRODUCTION logs:"
-          pm2 logs xclusive-production --lines 20 --nostream
+          echo "📝 Recent STAGING logs:"
+          pm2 logs xclusive-staging --lines 20 --nostream
 
           echo "💾 Saving PM2..."
           pm2 save
 
-          echo "✅ PRODUCTION deployment complete!"
+          echo "✅ STAGING deployment complete!"
 
           EOF
 
@@ -60,14 +60,14 @@ jobs:
         if: success()
         run: |
           echo "=========================================="
-          echo "🎉 PRODUCTION DEPLOYMENT SUCCESSFUL!"
-          echo "🌐 Production API: https://api.xclusivetouch.ca"
+          echo "🎉 STAGING DEPLOYMENT SUCCESSFUL!"
+          echo "🌐 Staging API: https://staging-api.xclusivetouch.ca"
           echo "=========================================="
 
       - name: Deployment Failed
         if: failure()
         run: |
           echo "=========================================="
-          echo "❌ PRODUCTION DEPLOYMENT FAILED!"
+          echo "❌ STAGING DEPLOYMENT FAILED!"
           echo "Check logs above for details"
           echo "=========================================="

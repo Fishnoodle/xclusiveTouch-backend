@@ -16,17 +16,26 @@ const path = require('path');
 // Email Template
 const Email = require('./templates/email');
 
-// env imports - Try production path first, fallback to local .env
+// env imports - Support local, staging, and production environments
 const productionEnvPath = '/root/config/xclusiveTouch.env';
+const stagingEnvPath = '/root/config/xclusiveTouch.staging.env';
 
-if (fs.existsSync(productionEnvPath)) {
+// Check NODE_ENV and load appropriate configuration
+if (process.env.NODE_ENV === 'staging' && fs.existsSync(stagingEnvPath)) {
+    // Staging environment
+    require('dotenv').config({ path: stagingEnvPath });
+    console.log('✅ Loaded STAGING environment from:', stagingEnvPath);
+    console.log('🔧 Environment: STAGING');
+} else if (fs.existsSync(productionEnvPath)) {
     // Production environment (DigitalOcean droplet)
     require('dotenv').config({ path: productionEnvPath });
-    console.log('✅ Loaded environment from:', productionEnvPath);
+    console.log('✅ Loaded PRODUCTION environment from:', productionEnvPath);
+    console.log('🔧 Environment: PRODUCTION');
 } else {
     // Local development environment
     require('dotenv').config();
-    console.log('✅ Loaded environment from: .env (local)');
+    console.log('✅ Loaded LOCAL development environment from: .env');
+    console.log('🔧 Environment: LOCAL');
 }
 
 
@@ -984,4 +993,7 @@ app.post('/api/exchangeContact/:id', async (req, res) => {
 
 app.listen(8001, () => {
     console.log('Server started on port 8001')
+    console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`)
+    console.log(`📍 Frontend URL: ${process.env.URL}`)
+    console.log(`💾 Database: ${process.env.MONGODB_URI?.includes('localhost') ? 'Local MongoDB' : 'MongoDB Atlas'}`)
 })
