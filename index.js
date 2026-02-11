@@ -993,8 +993,10 @@ app.post('/api/exchangeContact/:id', async (req, res) => {
     }
 })
 
-app.listen(8001, () => {
-    console.log('Server started on port 8001')
+const PORT = process.env.PORT || 8001;
+
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`)
     console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`)
     console.log(`📍 Frontend URL: ${process.env.URL}`)
     console.log(`💾 Database: ${process.env.MONGODB_URI?.includes('localhost') ? 'Local MongoDB' : 'MongoDB Atlas'}`)
