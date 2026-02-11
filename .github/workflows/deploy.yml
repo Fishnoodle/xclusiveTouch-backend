@@ -1,0 +1,72 @@
+name: Deploy Backend to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    name: SSH Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          echo "🔐 Setting up SSH..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
+          echo "✅ SSH setup complete."
+
+      - name: Deploy to Droplet
+        run: |
+          echo "🚀 Connecting to droplet..."
+
+          ssh -p ${{ secrets.DROPLET_PORT }} ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
+          set -e  # Exit on any error
+
+          echo "📂 Moving to app directory..."
+          cd /root/xclusiveTouch-backend
+
+          echo "📥 Pulling latest code..."
+          git pull origin main
+
+          echo "📦 Installing dependencies..."
+          npm install --production
+
+          echo "🔄 Reloading PM2..."
+          pm2 reload index || pm2 restart index
+
+          echo "📊 PM2 Status:"
+          pm2 status
+
+          echo "📝 Recent logs:"
+          pm2 logs index --lines 20 --nostream
+
+          echo "💾 Saving PM2..."
+          pm2 save
+
+          echo "✅ Deployment complete!"
+
+          EOF
+
+      - name: Deployment Success
+        if: success()
+        run: |
+          echo "=========================================="
+          echo "🎉 DEPLOYMENT SUCCESSFUL!"
+          echo "=========================================="
+
+      - name: Deployment Failed
+        if: failure()
+        run: |
+          echo "=========================================="
+          echo "❌ DEPLOYMENT FAILED!"
+          echo "Check logs above for details"
+          echo "=========================================="
