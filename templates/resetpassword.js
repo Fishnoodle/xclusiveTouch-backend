@@ -18,13 +18,13 @@ const baseUrl = process.env.URL
     : "";
 
 function ResetPassword(props) {
-    const { userFirstname, id } = props;
+    const { userEmail, resetUrl } = props;
 
     return React.createElement(
         Html,
         null,
         React.createElement(Head, null),
-        React.createElement(Preview, null, 'XclusiveTouch reset your password'),
+        React.createElement(Preview, null, 'Reset Your Xclusive Touch Password'),
         React.createElement(
             Body,
             { style: main },
@@ -38,29 +38,39 @@ function ResetPassword(props) {
                     alt: 'Xclusive Touch Logo',
                     style: logo,
                 }),
-                React.createElement(Text, { style: text }, `Hi ${userFirstname},`),
+                React.createElement(Text, { style: text }, `Hello,`),
                 React.createElement(
                     Section
                 ),
                 React.createElement(
                     Text,
                     { style: text },
-                    'Someone recently request a password change for you XclusiveTouch account. If this was you, you can set a new password here:'
+                    'We received a request to reset the password for your Xclusive Touch account. Click the button below to set a new password:'
                 ),
                 React.createElement(
                     Section,
                     { style: btnContainer },
-                    React.createElement(Button, { style: button, href: `https://www.xclusivetouch.ca/confirmpassword/${id}`, target: '_blank'}, 'Reset Password')
+                    React.createElement(Button, { style: button, href: resetUrl, target: '_blank'}, 'Reset Password')
                 ),
                 React.createElement(
                     Text,
                     { style: text },
-                    'If you did not want to change your password or did not request this, just ignore and delete this message.'
+                    'Or copy and paste this URL into your browser:'
+                ),
+                React.createElement(
+                    Text,
+                    { style: linkText },
+                    resetUrl
                 ),
                 React.createElement(
                     Text,
                     { style: text },
-                    'To keep your account secure, please do not forward this email to anyone. This email will expire in 15 minutes.',
+                    'If you did not request a password reset, please ignore this email. Your password will remain unchanged.'
+                ),
+                React.createElement(
+                    Text,
+                    { style: text },
+                    'For security reasons, this link will expire in 15 minutes. Do not forward this email to anyone.',
                 ),
                 React.createElement(
                     Text,
@@ -97,6 +107,14 @@ const text = {
     fontSize: '16px',
     lineHeight: '24px',
     fontWeight: '300',
+}
+
+const linkText = {
+    fontSize: '14px',
+    lineHeight: '24px',
+    fontWeight: '300',
+    color: '#0066cc',
+    wordBreak: 'break-all',
 }
 
 const btnContainer = {

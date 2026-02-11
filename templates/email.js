@@ -12,33 +12,8 @@ const {
   Text,
 } = require('@react-email/components');
 
-const baseUrl = process.env.URL
-  ? `https://${process.env.URL}`
-  : "";
-
 function Email(props) {
-  const { userFirstname } = props;
-
-  const steps = [
-    {
-        id: 1,
-        Description: React.createElement(
-            'li',
-            { className: 'mb-20', key: 1 },
-            React.createElement('strong', null, 'Customize Your Card.'),
-            ' Use our easy-to-navigate tools to personalize your cards with your details and logo.'
-        )
-    },
-    {
-        id: 2,
-        Description: React.createElement(
-            'li',
-            { className: 'mb-20', key: 2 },
-            React.createElement('strong', null, 'Get Inspired.'),
-            ' Visit our blog for tips on networking, branding, and making the most of your business cards.'
-        )
-    }
-  ];
+  const { userFirstname, confirmationUrl } = props;
 
   return React.createElement(
     Html,
@@ -62,30 +37,41 @@ function Email(props) {
         React.createElement(
           Text,
           { style: paragraph },
-          'Welcome to Xclusive Touch! We are thrilled to have you on board.'
+          'Thank you for registering with Xclusive Touch!'
         ),
         React.createElement(
           Text,
           { style: paragraph },
-          "Your registration is now complete, and you're all set to explore our unique selection of customizable business cards. Whether you're looking to make a lasting impression or simply elevate your brand, we've got you covered."
-        ),
-        React.createElement(Text, { style: paragraph }, "Here's what you can do next"),
-        React.createElement('ul', null, steps.map(({ Description }) => Description)),
-        React.createElement(Text, { style: paragraph }, 'Need Assistance?'),
-        React.createElement(
-          Text,
-          { style: paragraph },
-          'If you have any questions or need support, our customer service team is here to help! Feel free to reply to this email.'
-        ),
-        React.createElement(
-          Text,
-          { style: paragraph },
-          "Thank you for choosing Xclusive Touch. We can't wait to help you create a business card that truly represents you!"
+          'To complete your registration and start creating your digital business card, please confirm your email address by clicking the button below:'
         ),
         React.createElement(
           Section,
           { style: btnContainer },
-          React.createElement(Button, { style: button, href: 'https://www.xclusivetouch.ca/login', target: '_blank' }, 'Get started')
+          React.createElement(
+            Button, 
+            { style: button, href: confirmationUrl }, 
+            'Confirm Email Address'
+          )
+        ),
+        React.createElement(
+          Text,
+          { style: paragraph },
+          'Or copy and paste this link into your browser:'
+        ),
+        React.createElement(
+          Text,
+          { style: { ...paragraph, color: '#666', fontSize: '14px', wordBreak: 'break-all' } },
+          confirmationUrl
+        ),
+        React.createElement(
+          Text,
+          { style: paragraph },
+          'This link will expire in 24 hours for security reasons.'
+        ),
+        React.createElement(
+          Text,
+          { style: paragraph },
+          "If you didn't create an account with Xclusive Touch, you can safely ignore this email."
         ),
         React.createElement(
           Text,
