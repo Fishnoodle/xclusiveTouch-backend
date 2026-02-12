@@ -128,7 +128,7 @@ app.post('/api/register', async (req, res) => {
             confirmationTokenExpiration: tokenExpiration
         });
 
-        // Send confirmation email
+        // Send confirmation email asynchronously
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -152,9 +152,12 @@ app.post('/api/register', async (req, res) => {
             html: emailHtml
         };
 
-        await transporter.sendMail(mailOptions);
-        console.log('Confirmation email sent to:', req.body.email);
+        // Send email in the background
+        transporter.sendMail(mailOptions)
+            .then(() => console.log('Confirmation email sent to:', req.body.email))
+            .catch(err => console.error('Email send error:', err));
 
+        // Respond immediately
         res.json({ 
             status: 'ok', 
             message: 'Registration successful. Please check your email to verify your account.',
